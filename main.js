@@ -1,111 +1,132 @@
-import './style.css'
-import * as d3 from "d3"
+class LiquidityPool {
+  /**
+   * Create a simplified AMM liquidity pool.
+   * @param {number} tokenA - The initial amount of tokenA liquidity.
+   * @param {number} tokenB - The initial amount of tokenB liquidity.
+   */
+  constructor(tokenA, tokenB) {
+    this.tokenA = tokenA;
+    this.tokenB = tokenB;
+  }
 
-const html = String.raw
+  /**
+   * @param {number} amountA - The amount of tokenA liquidity to provide.
+   */
+  provideTokenA(amountA) {
+    this.tokenA += amountA;
+  }
 
-document.querySelector('#app').innerHTML = html`<h1>Interactive Revnet</h1>
-<div id="visualization"></div>
-<div>
-  <label for="priceCeilingCurve">Price Ceiling Curve:</label>
-  <input type="range" id="priceCeilingCurve" name="priceCeilingCurve" min="0" max="1" step="0.01" value="0.05" oninput="document.getElementById('ceilingValue').textContent = Math.round(this.value * 100) + '%'">
-  <span id="ceilingValue">5%</span>
-</div>
-<div>
-  <label for="priceFloorCurve">Price Floor Curve:</label>
-  <input type="range" id="priceFloorCurve" name="priceFloorCurve" min="0" max="1" step="0.01" value="0.33" oninput="document.getElementById('floorValue').textContent = Math.round(this.value * 100) + '%'">
-  <span id="floorValue">33%</span>
-</div>
-<button id="test">Test</button>
-`
+  /**
+   * @param {number} amountB - The amount of tokenB liquidity to provide.
+   */
+  proveTokenB(amountB) {
+    this.tokenB += amountB;
+  }
 
-const MAX_GENERATIONS = 50
+  /**
+   * @return {number} The price of tokenA in terms of tokenB.
+   */
+  getPriceOfTokenA() {
+    return this.tokenB / this.tokenA;
+  }
 
-// Declare the chart dimensions and margins.
-const width = 800;
-const height = 600;
-const marginTop = 20;
-const marginRight = 20;
-const marginBottom = 30;
-const marginLeft = 40;
+  /**
+   * @return {number} The price of tokenB in terms of tokenA.
+   */
+  getPriceOfTokenB() {
+    return this.tokenA / this.tokenB;
+  }
 
-// Declare the x (horizontal position) scale.
-const x = d3.scaleLinear()
-  .domain([1, MAX_GENERATIONS])
-  .range([marginLeft, width - marginRight]);
+  /**
+   * Spend tokenB to buy tokenA.
+   * @param {number} amountB - The amount of tokenB to spend.
+   */
+  buyTokenA(amountB) {
+    let amountA = amountB / this.getPriceOfTokenA();
+    this.tokenA -= amountA;
+    this.tokenB += amountB;
+  }
+  /**
+   * Spend tokenA to buy tokenB.
+   * @param {number} amountA - The amount of tokenA to spend.
+   */
+  buyTokenB(amountA) {
+    let amountB = amountA / this.getPriceOfTokenB();
+    this.tokenB -= amountB;
+    this.tokenA += amountA;
+  }
 
-// Declare the y (vertical position) scale.
-const y = d3.scaleLinear()
-  .domain([0, 100])
-  .range([height - marginBottom, marginTop]);
-
-// Create the SVG container.
-const svg = d3.select("#visualization")
-  .append("svg")
-  .attr("width", width)
-  .attr("height", height);
-
-// Add the x-axis.
-svg.append("g")
-  .attr("transform", `translate(0,${height - marginBottom})`)
-  .call(d3.axisBottom(x));
-svg.append("text")
-  .attr("transform", `translate(${width / 2}, ${height})`) // Position at the middle of the x-axis
-  .style("text-anchor", "middle") // Center the text
-  .text("Generation Number");
-
-// Add the y-axis.
-svg.append("g")
-  .attr("transform", `translate(${marginLeft},0)`)
-  .call(d3.axisLeft(y));
-svg.append("text")
-  .attr("transform", "rotate(-90)") // Rotate the text
-  .attr("y", 0 - marginLeft) // Position at the left of the y-axis
-  .attr("x", 0 - (height / 2)) // Position at the middle of the y-axis
-  .attr("dy", "1em") // Adjust the position a bit
-  .style("text-anchor", "middle") // Center the text
-  .text("ETH Price per Token");
-
-// Add the price ceiling
-let priceCeilingPath = svg.append("path")
-  .attr("fill", "none")
-  .attr("stroke", "steelblue")
-  .attr("stroke-width", 1.5)
-let priceCeilingLine = d3.line()
-  .x(d => x(d.generation))
-  .y(d => y(d.price))
-
-function updatePriceCeiling() {
-  const priceCeilingCurve = document.getElementById("priceCeilingCurve").value
-  const priceCeiling = (generationNumber) => 1 / Math.pow((1 - priceCeilingCurve), (generationNumber - 1))
-  let priceCeilingData = [];
-  for (let i = 1; i < MAX_GENERATIONS; i++)
-    priceCeilingData.push({ generation: i, price: priceCeiling(i) })
-
-  priceCeilingPath.datum(priceCeilingData).attr("d", priceCeilingLine)
+  displayPool() {
+    const poolData = {
+      "tokenA balance": this.tokenA.toLocaleString(),
+      "tokenB balance": this.tokenB.toLocaleString(),
+      "tokenA price": this.getPriceOfTokenA().toLocaleString(),
+      "tokenB price": this.getPriceOfTokenB().toLocaleString(),
+    };
+    console.table(poolData);
+  }
 }
-updatePriceCeiling()
 
-// Add the price floor
-let priceFloorPath = svg.append("path")
-  .attr("fill", "none")
-.attr("stroke", "red")
-.attr("stroke-width", 1.5)
-let priceFloorLine = d3.line()
-  .x(d => x(d.generation))
-  .y(d => y(d.price))
+class Revnet {
+  constructor(
+    priceCeilingIncreasePercentage,
+    priceCeilingIncreaseFrequencyInDays,
+    priceFloorTaxIntensity,
+    premintAmount,
+    boostPercent,
+    boostDurationInDays
+  ) {
+    this.priceCeilingIncreasePercentage = priceCeilingIncreasePercentage;
+    this.priceCeilingIncreaseFrequencyInDays =
+      priceCeilingIncreaseFrequencyInDays;
+    this.priceFloorTaxIntensity = priceFloorTaxIntensity;
+    this.premintAmount = premintAmount;
+    this.boostPercent = boostPercent;
+    this.boostDurationInDays = boostDurationInDays;
+    this.tokensSentToBoost = premintAmount;
 
-function updatePriceFloor() {
-  const priceFloorCurve = document.getElementById("priceFloorCurve").value
-  const priceFloor = (tokensBeingDestroyed, revnetTokenSupply, revnetEthSupply) => (revnetEthSupply * tokensBeingDestroyed / revnetTokenSupply) * ((1 - priceFloorCurve) + (priceFloorCurve * tokensBeingDestroyed / revnetTokenSupply))
-  let priceFloorData = [];
-  for(let i = 1; i < MAX_GENERATIONS; i++)
-    priceFloorData.push({ generation: i, price: priceFloor(1, 10, i) })
-  
-  priceFloorPath.datum(priceFloorData).attr("d", priceFloorLine)
+    this.tokenSupply = premintAmount;
+    this.ethBalance = 0;
+  }
+
+  getTokensCreatedPerEth(day) {
+    return Math.pow(
+        1 - this.priceCeilingIncreasePercentage,
+        Math.floor(day / this.priceCeilingIncreaseFrequencyInDays)
+      )
+  }
+  getEthReclaimAmount(tokensBeingDestroyed) {
+    const ratioBeingDestroyed = tokensBeingDestroyed / this.tokenSupply;
+    const intensityTerm =
+      1 -
+      this.priceFloorTaxIntensity +
+      ratioBeingDestroyed * this.priceFloorTaxIntensity;
+    return tokensBeingDestroyed * this.ethBalance * intensityTerm;
+  }
+
+  createTokensAtCeiling(ethAmount, day) {
+    let tokenAmount = ethAmount * this.getTokensCreatedPerEth(day);
+    this.ethBalance += ethAmount;
+    this.tokenSupply += tokenAmount;
+    if (day < this.boostDurationInDays) {
+      this.tokensSentToBoost += tokenAmount * this.boostPercent;
+      return tokenAmount * (1 - this.boostPercent);
+    } else {
+      return tokenAmount;
+    }
+  }
+  destroyTokensAtFloor(tokenAmount) {
+    let ethAmount = this.getEthReclaimAmount(tokenAmount)
+    this.tokenSupply -= tokenAmount
+    this.ethBalance -= ethAmount
+    return ethAmount;
+  }
 }
-updatePriceFloor()
 
-document.querySelector("#test").onclick = () => updatePriceFloor()
-
-document.querySelector("#priceCeilingCurve").addEventListener("input", updatePriceCeiling)
-document.querySelector("#priceFloorCurve").addEventListener("input", updatePriceFloor)
+// Simulation params
+const daysToCalculate = 365;
+const volumeRatio = 0.03; // 0-1: The average portion of token supply which is traded over 24 hours. Typically 1-5%.
+const volumeVariance = 0.5; // 0-1: The amount by which the volume fluctuates.
+const volatility = 0.5; // 0-1: The range of random price changes. At 100%.
+const demand = 0.5; // -1 to 1: The overall trend of price changes (negative for downward, positive for upward).
+const liquidity = 0.1; // The percentage of tokens made available on secondary markets once they are purchased.
