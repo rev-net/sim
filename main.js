@@ -1,3 +1,5 @@
+import * as Plot from "@observablehq/plot";
+
 class LiquidityPool {
   /**
    * Create a simplified constant product AMM liquidity pool (x*y==k).
@@ -201,13 +203,29 @@ class Revnet {
    * @param {number} ethAmount The amount of ETH returned.
    * @return {number} The token price floor, or the number of tokens needed to reclaim ethAmount.
    */
-  getPriceFloor(ethAmount) {
-    const sqrtTerm = Math.sqrt(this.ethBalance * (4 * this.priceFloorTaxIntensity * ethAmount + this.ethBalance - 2 * this.priceFloorTaxIntensity * this.ethBalance + this.priceFloorTaxIntensity * this.priceFloorTaxIntensity * this.ethBalance))
-    
-    const x1 = (-this.tokenSupply * this.ethBalance + this.priceFloorTaxIntensity * this.tokenSupply * this.ethBalance - this.tokenSupply * sqrtTerm) / (2 * this.priceFloorTaxIntensity * this.ethBalance)
-    const x2 = (-this.tokenSupply * this.ethBalance + this.priceFloorTaxIntensity * this.tokenSupply * this.ethBalance + this.tokenSupply * sqrtTerm) / (2 * this.priceFloorTaxIntensity * this.ethBalance)
-    
-    return x1 > x2 ? x1 : x2
+  getTokensNeededToClaimEthAmount(ethAmount) {
+    const sqrtTerm = Math.sqrt(
+      this.ethBalance *
+        (4 * this.priceFloorTaxIntensity * ethAmount +
+          this.ethBalance -
+          2 * this.priceFloorTaxIntensity * this.ethBalance +
+          this.priceFloorTaxIntensity *
+            this.priceFloorTaxIntensity *
+            this.ethBalance)
+    );
+
+    const x1 =
+      (-this.tokenSupply * this.ethBalance +
+        this.priceFloorTaxIntensity * this.tokenSupply * this.ethBalance -
+        this.tokenSupply * sqrtTerm) /
+      (2 * this.priceFloorTaxIntensity * this.ethBalance);
+    const x2 =
+      (-this.tokenSupply * this.ethBalance +
+        this.priceFloorTaxIntensity * this.tokenSupply * this.ethBalance +
+        this.tokenSupply * sqrtTerm) /
+      (2 * this.priceFloorTaxIntensity * this.ethBalance);
+
+    return x1 > x2 ? x1 : x2;
   }
 
   incrementDay() {
@@ -215,86 +233,209 @@ class Revnet {
   }
 }
 
-// Simulation metaparameters
-const daysToCalculate = 30;
-const volumeRatio = 0.03; // 0-1: The average portion of token supply which is traded over 24 hours. Typically 1-5%.
-const volumeVariance = 0.5; // 0-1: The amount by which the volume fluctuates.
-const volatility = 0.5; // 0-1: The range of random price changes. At 100%.
-const demand = 0.5; // -1 to 1: The overall trend of price changes (negative for downward, positive for upward).
-const liquidityRatio = 0.1; // The percentage of tokens made available on secondary markets once they are purchased.
+/**
+ * Function to purchase Revnet tokens, routing payments to the most cost-effective option.
+ * @param {number} ethSpent - The amount of ETH spent to purchase tokens.
+ * @param {object} r - The Revnet object.
+ * @param {object} p - The LiquidityPool object.
+ * @returns {number} - The number of tokens purchased.
+ */
+function purchaseRevnetTokens(ethSpent, r, p) {
+  if (
+    p.revnetToken > p.getRevnetTokenReturn(ethSpent) &&
+    p.getRevnetTokenReturn(ethSpent) > r.getTokensCreatedPerEth() * ethSpent
+  ) {
+    return p.buyRevnetTokens(ethSpent);
+  } else {
+    return r.createTokensAtCeiling(ethSpent);
+  }
+}
 
-function main() {
-  const r = new Revnet(0.02, 1, 0.33, 100, 0.1, 100);
+/**
+ * Function to sell Revnet tokens, routing payments to the most cost-effective option.
+ * @param {number} revnetTokensSpent - The amount of Revnet tokens spent to sell.
+ * @param {object} r - The Revnet object.
+ * @param {object} p - The LiquidityPool object.
+ * @returns {number} - The amount of ETH received from selling tokens.
+ */
+function sellRevnetTokens(revnetTokensSpent, r, p) {
+  if (
+    p.eth > p.getEthReturn(revnetTokensSpent) &&
+    p.getEthReturn(revnetTokensSpent) > r.getEthReclaimAmount(revnetTokensSpent)
+  ) {
+    return p.buyEth(revnetTokensSpent);
+  } else if (r.getEthReclaimAmount(revnetTokensSpent) < r.ethBalance) {
+    return r.destroyTokensAtFloor(revnetTokensSpent);
+  }
+  return 0;
+}
+
+function poissonRandomNumber(lambda) {
+  let L = Math.exp(-lambda);
+  let k = 0;
+  let p = 1;
+
+  do {
+    k++;
+    p *= Math.random();
+  } while (p > L);
+
+  return k - 1;
+}
+
+function normalRandomNumber() {
+  let u = 0,
+    v = 0;
+  while (u === 0) u = Math.random();
+  while (v === 0) v = Math.random();
+  return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+}
+
+function logNormRandomNumber(mu = 0, sigma = 1.5) {
+  return Math.exp(mu + sigma * normalRandomNumber());
+}
+
+function randomTrial() {
+  let results = [];
+  for (let i = 0; i < 100; i++) {
+    results.push({
+      index: i,
+      poisson: poissonRandomNumber(i),
+      normalRandomNumber: normalRandomNumber(),
+      logvar1_1: logNormRandomNumber(1, 1),
+      logvar0_1: logNormRandomNumber(0, 1),
+      logvar0_15: logNormRandomNumber(0, 1.5),
+    });
+  }
+
+  console.table(results);
+}
+// randomTrial();
+
+// Simulation metaparameters
+const daysToCalculate = 100; // The number of days to simulate for (10 - 100)
+const dailyTradesLambda = 5; // The lambda used in a poisson distribution for the number of daily trades
+const demandTrend = 0.6; // 0 to 1: The overall trend of price changes (<0.5 downward, >0.5 upward).
+
+const tradeAmountMean = 0; // The lognorm mean for the amount in a trade
+const tradeAmountVariance = 1.5; // The lognorm variance for the amount in a trade
+
+const revnetTokenLiquidityRatio = 0.1; // The percentage of tokens made available on secondary markets once they are purchased.
+const ethLiquidityRatio = 0.1; // The percentage of eth made available on secondary markets once it is purchased
+
+function simulate() {
+  const r = new Revnet(0.02, 1, 0.33, 0, 0.1, 100);
   const p = new LiquidityPool(10, 10);
   const simulationResults = [];
 
   for (; r.day < daysToCalculate; r.incrementDay()) {
-    // Create orders
-    p.provideEth(0.02);
-
-    // purchase
-    let ethSpent = 2;
-    let revnetTokensReceived;
-    if (
-      p.revnetToken > p.getRevnetTokenReturn(ethSpent) &&
-      p.getRevnetTokenReturn(ethSpent) > r.getTokensCreatedPerEth() * ethSpent
-    ) {
-      revnetTokensReceived = p.buyRevnetTokens(ethSpent);
-    } else {
-      revnetTokensReceived = r.createTokensAtCeiling(ethSpent);
+    let trades = [];
+    for (let i = 0; i < poissonRandomNumber(dailyTradesLambda); i++) {
+      let tradeAmount = logNormRandomNumber(
+        tradeAmountMean,
+        tradeAmountVariance
+      );
+      if (Math.random() < demandTrend) {
+        let revnetTokensPurchased = purchaseRevnetTokens(tradeAmount, r, p);
+        p.provideRevnetTokens(
+          revnetTokenLiquidityRatio * revnetTokensPurchased
+        );
+        trades.push({
+          trade: i,
+          type: "buy",
+          spent: tradeAmount,
+          received: revnetTokensPurchased,
+        });
+      } else {
+        let ethPurchased = sellRevnetTokens(tradeAmount, r, p);
+        p.provideEth(ethLiquidityRatio * ethPurchased);
+        trades.push({
+          trade: i,
+          type: "sell",
+          spent: tradeAmount,
+          received: ethPurchased,
+        });
+      }
     }
-    p.provideRevnetTokens(revnetTokensReceived * liquidityRatio);
-
-    // sale
-    let revnetTokensSpent = 1;
-    let ethReceived;
-    if (
-      p.eth > p.getEthReturn(revnetTokensSpent) &&
-      p.getEthReturn(revnetTokensSpent) >
-        r.getEthReclaimAmount(revnetTokensSpent)
-    ) {
-      ethReceived = p.buyEth(revnetTokensSpent);
-    } else {
-      ethReceived = r.destroyTokensAtFloor(revnetTokensSpent);
-    }
-    // p.provideEth(ethReceived * liquidityRatio);
 
     simulationResults.push({
       day: r.day,
       ethBalance: r.ethBalance,
       tokenSupply: r.tokenSupply,
       priceCeiling: r.getPriceCeiling(),
-      priceFloor: r.getPriceFloor(1),
-      ethReclaimAmount: r.getEthReclaimAmount(1),
+      priceFloor: r.getEthReclaimAmount(1),
       tokensSentToBoost: r.tokensSentToBoost,
       poolEthBalance: p.eth,
       poolRevnetTokenBalance: p.revnetToken,
       poolRevnetTokenPrice: p.getMarginalPriceOfRevnetToken(),
+      trades,
     });
   }
 
   console.table(simulationResults);
+
+  return simulationResults;
 }
 
-function test() {
-  let data = [];
-  let r;
-  for (r = new Revnet(0.05, 1, 0.5, 0, 0, 0); r.day < 20; r.incrementDay()) {
-    r.createTokensAtCeiling(1);
+const gruv = {
+  light: "#fbf1c7",
+  light1: "#ebdbb2",
+  light2: "#d5c4a1",
+  light3: "#bdae93",
+  light4: "#a89984",
+  dark: "#282828",
+  dark1: "#3c3836",
+  dark2: "#504945",
+  dark3: "#665c54",
+  dark4: "#7c6f64",
+  red: "#fb4934",
+  green: "#b8bb26",
+  yellow: "#fabd2f",
+  blue: "#83a598",
+  purple: "#d3869b",
+  aqua: "#8ec07c",
+  orange: "#fe8019",
+};
 
-    data.push({
-      tokenSupply: r.tokenSupply,
-      ethBalance: r.ethBalance,
-      priceFloor: r.getPriceFloor(1),
-      ethReclaimAmount: r.getEthReclaimAmount(1),
-      priceCeiling: r.getPriceCeiling(),
-    });
-  }
+function main() {
+  const dashboard = document.getElementById("dashboard");
 
-  console.table(data);
+  console.time("simulate");
+  let simulationData = simulate();
+  console.timeEnd("simulate");
+
+  let plot = Plot.plot({
+    title: "Revnet Token Price",
+    style: {
+      color: gruv.dark,
+      backgroundColor: gruv.light,
+      fontSize: "16px",
+      fontFamily: "'Times New Roman', Times, serif",
+    },
+    x: { label: "Day" },
+    y: { label: "ETH", grid: true },
+    marks: [
+      Plot.ruleY([0]),
+      Plot.line(simulationData, {
+        x: "day",
+        y: "poolRevnetTokenPrice",
+        stroke: gruv.blue,
+      }),
+      Plot.line(simulationData, {
+        x: "day",
+        y: "priceCeiling",
+        stroke: gruv.green,
+        curve: "step",
+      }),
+      Plot.line(simulationData, {
+        x: "day",
+        y: "priceFloor",
+        stroke: gruv.red,
+      }),
+    ],
+  });
+
+  dashboard.appendChild(plot);
 }
 
-console.time("simulate");
 main();
-// test();
-console.timeEnd("simulate");

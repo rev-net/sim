@@ -1,12 +1,83 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Interactive Revnet</title>
+    <link rel="stylesheet" href="style.css">
   </head>
   <body>
-    <div id="app"></div>
+    <div id="dashboard"></div>
+    <div id="inputs">
+      <section>
+        <h2>Revnet Parameters</h2>
+        <input
+          type="number"
+          id="priceCeilingIncreasePercentage"
+          placeholder="Price Ceiling Increase Percentage"
+        />
+        <input
+          type="number"
+          id="priceCeilingIncreaseFrequencyInDays"
+          placeholder="Price Ceiling Increase Frequency In Days"
+        />
+        <input
+          type="number"
+          id="priceFloorTaxIntensity"
+          placeholder="Price Floor Tax Intensity"
+        />
+        <input type="number" id="premintAmount" placeholder="Premint Amount" />
+        <input type="number" id="boostPercent" placeholder="Boost Percent" />
+        <input
+          type="number"
+          id="boostDurationInDays"
+          placeholder="Boost Duration In Days"
+        />
+      </section>
+      <section>
+        <h2>Liquidity Pool Parameters</h2>
+        <input type="number" id="eth" placeholder="Initial ETH" />
+        <input
+          type="number"
+          id="revnetToken"
+          placeholder="Initial Revnet Token"
+        />
+      </section>
+      <section>
+        <h2>Simulation Metaparameters</h2>
+        <input
+          type="number"
+          id="daysToCalculate"
+          placeholder="Days To Calculate"
+        />
+        <input
+          type="number"
+          id="dailyTradesLambda"
+          placeholder="Daily Trades Lambda"
+        />
+        <input type="number" id="demandTrend" placeholder="Demand Trend" />
+        <input
+          type="number"
+          id="tradeAmountMean"
+          placeholder="Trade Amount Mean"
+        />
+        <input
+          type="number"
+          id="tradeAmountVariance"
+          placeholder="Trade Amount Variance"
+        />
+        <input
+          type="number"
+          id="revnetTokenLiquidityRatio"
+          placeholder="Revnet Token Liquidity Ratio"
+        />
+        <input
+          type="number"
+          id="ethLiquidityRatio"
+          placeholder="ETH Liquidity Ratio"
+        />
+      </section>
+    </div>
     <script type="module" src="/main.js"></script>
   </body>
 </html>
