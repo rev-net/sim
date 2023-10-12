@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Interactive Revnet</title>
+    <title>Revnet Simulator</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -76,33 +76,6 @@
         <input type="number" id="eth" value="10" />
         <label for="revnetToken">Initial Revnet Token</label>
         <input type="number" id="revnetToken" value="0" />
-        <button>Simulate</button>
-      </section>
-      <section>
-        <h2>Simulation Metaparameters</h2>
-        <label for="daysToCalculate">Days To Calculate</label>
-        <input type="number" id="daysToCalculate" value="100" />
-        <label for="dailyTradesLambda">Daily Trades Lambda</label>
-        <input type="number" id="dailyTradesLambda" value="5" />
-        <label for="tradeAmountMean">Trade Amount Mean</label>
-        <input type="number" id="tradeAmountMean" value="0" />
-        <label for="tradeAmountVariance">Trade Amount Variance</label>
-        <input type="number" id="tradeAmountVariance" value="1.5" />
-        <label for="demandTrend">Demand Trend</label>
-        <input
-          type="range"
-          id="demandTrend"
-          value="0.6"
-          step="0.01"
-          min="0"
-          max="1"
-          oninput="updateSliderPercent(this)"
-        />
-        <div class="slider-values">
-          <span class="min-value">0%</span>
-          <span class="current-value">60%</span>
-          <span class="max-value">100%</span>
-        </div>
         <label for="revnetTokenLiquidityRatio"
           >Revnet Token Liquidity Ratio</label
         >
@@ -135,6 +108,33 @@
           <span class="current-value">10%</span>
           <span class="max-value">100%</span>
         </div>
+        <button id="simulate">Simulate</button>
+      </section>
+      <section>
+        <h2>Simulation Metaparameters</h2>
+        <label for="daysToCalculate">Days To Calculate</label>
+        <input type="number" id="daysToCalculate" value="100" />
+        <label for="dailyTradesLambda">Daily Trades Lambda</label>
+        <input type="number" id="dailyTradesLambda" value="5" />
+        <label for="tradeAmountMean">Trade Amount Mean</label>
+        <input type="number" id="tradeAmountMean" value="0" />
+        <label for="tradeAmountVariance">Trade Amount Variance</label>
+        <input type="number" id="tradeAmountVariance" value="1.5" />
+        <label for="demandTrend">Demand Trend</label>
+        <input
+          type="range"
+          id="demandTrend"
+          value="0.6"
+          step="0.01"
+          min="0"
+          max="1"
+          oninput="updateSliderPercent(this)"
+        />
+        <div class="slider-values">
+          <span class="min-value">0%</span>
+          <span class="current-value">60%</span>
+          <span class="max-value">100%</span>
+        </div>
       </section>
     </div>
     <div id="dashboard"></div>
@@ -145,10 +145,12 @@
         currentValueSpan.textContent = `${Math.floor(slider.value * 100)}%`;
       }
 
-      document.querySelector("button").addEventListener("click", function () {
-        this.classList.add("dance");
-        setTimeout(() => this.classList.remove("dance"), 2000);
-      });
+      document
+        .querySelector("#simulate")
+        .addEventListener("click", function () {
+          this.classList.add("dance");
+          setTimeout(() => this.classList.remove("dance"), 500);
+        });
     </script>
     <script type="module" src="/main.js"></script>
   </body>

@@ -313,6 +313,7 @@ function randomTrial() {
 // randomTrial();
 
 // Simulation metaparameters
+/*
 const daysToCalculate = 100; // The number of days to simulate for (10 - 100)
 const dailyTradesLambda = 5; // The lambda used in a poisson distribution for the number of daily trades
 const demandTrend = 0.6; // 0 to 1: The overall trend of price changes (<0.5 downward, >0.5 upward).
@@ -322,10 +323,72 @@ const tradeAmountVariance = 1.5; // The lognorm variance for the amount in a tra
 
 const revnetTokenLiquidityRatio = 0.1; // The percentage of tokens made available on secondary markets once they are purchased.
 const ethLiquidityRatio = 0.1; // The percentage of eth made available on secondary markets once it is purchased
+*/
 
 function simulate() {
-  const r = new Revnet(0.02, 1, 0.33, 0, 0.1, 100);
-  const p = new LiquidityPool(10, 10);
+  // Get values from inputs
+  let priceCeilingIncreaseFrequencyInDays = Number(
+    document.getElementById("priceCeilingIncreaseFrequencyInDays").value
+  );
+  let priceCeilingIncreasePercentage = Number(
+    document.getElementById("priceCeilingIncreasePercentage").value
+  );
+  let priceFloorTaxIntensity = Number(
+    document.getElementById("priceFloorTaxIntensity").value
+  );
+  let boostPercent = Number(document.getElementById("boostPercent").value);
+  let boostDurationInDays = Number(
+    document.getElementById("boostDurationInDays").value
+  );
+  let premintAmount = Number(document.getElementById("premintAmount").value);
+  let eth = Number(document.getElementById("eth").value);
+  let revnetToken = Number(document.getElementById("revnetToken").value);
+  let daysToCalculate = Number(
+    document.getElementById("daysToCalculate").value
+  );
+  let dailyTradesLambda = Number(
+    document.getElementById("dailyTradesLambda").value
+  );
+  let tradeAmountMean = Number(
+    document.getElementById("tradeAmountMean").value
+  );
+  let tradeAmountVariance = Number(
+    document.getElementById("tradeAmountVariance").value
+  );
+  let demandTrend = Number(document.getElementById("demandTrend").value);
+  let revnetTokenLiquidityRatio = Number(
+    document.getElementById("revnetTokenLiquidityRatio").value
+  );
+  let ethLiquidityRatio = Number(
+    document.getElementById("ethLiquidityRatio").value
+  );
+  console.table({
+    priceCeilingIncreaseFrequencyInDays,
+    priceCeilingIncreasePercentage,
+    priceFloorTaxIntensity,
+    boostPercent,
+    boostDurationInDays,
+    premintAmount,
+    eth,
+    revnetToken,
+    daysToCalculate,
+    dailyTradesLambda,
+    tradeAmountMean,
+    tradeAmountVariance,
+    demandTrend,
+    revnetTokenLiquidityRatio,
+    ethLiquidityRatio,
+  });
+
+  const r = new Revnet(
+    priceCeilingIncreasePercentage,
+    priceCeilingIncreaseFrequencyInDays,
+    priceFloorTaxIntensity,
+    premintAmount,
+    boostPercent,
+    boostDurationInDays
+  );
+  const p = new LiquidityPool(eth, revnetToken);
   const simulationResults = [];
 
   for (; r.day < daysToCalculate; r.incrementDay()) {
@@ -363,7 +426,10 @@ function simulate() {
       ethBalance: r.ethBalance,
       tokenSupply: r.tokenSupply,
       priceCeiling: r.getPriceCeiling(),
-      priceFloor: r.getEthReclaimAmount(1),
+      priceFloor:
+        r.tokenSupply > 1
+          ? r.getEthReclaimAmount(1)
+          : r.getEthReclaimAmount(r.tokenSupply),
       tokensSentToBoost: r.tokensSentToBoost,
       poolEthBalance: p.eth,
       poolRevnetTokenBalance: p.revnetToken,
@@ -397,45 +463,123 @@ const gruv = {
   orange: "#fe8019",
 };
 
+const dashboard = document.getElementById("dashboard");
+const chartStyles = {
+  color: gruv.dark,
+  backgroundColor: gruv.light,
+  fontSize: "16px",
+  fontFamily: "'Times New Roman', Times, serif",
+  overflow: "visible",
+};
 function main() {
-  const dashboard = document.getElementById("dashboard");
+  dashboard.innerHTML = "";
 
   console.time("simulate");
   let simulationData = simulate();
   console.timeEnd("simulate");
 
-  let plot = Plot.plot({
+  let tokenPricePlot = Plot.plot({
     title: "Revnet Token Price",
-    style: {
-      color: gruv.dark,
-      backgroundColor: gruv.light,
-      fontSize: "16px",
-      fontFamily: "'Times New Roman', Times, serif",
-    },
+    style: chartStyles,
     x: { label: "Day" },
     y: { label: "ETH", grid: true },
     marks: [
       Plot.ruleY([0]),
+      Plot.ruleX(
+        simulationData,
+        Plot.pointerX({
+          x: "day",
+          py: "poolRevnetTokenPrice",
+          stroke: gruv.dark,
+        })
+      ),
+      Plot.dot(simulationData, Plot.pointerX({x: "day", y: "poolRevnetTokenPrice", stroke: gruv.dark})),
+      Plot.dot(simulationData, Plot.pointerX({x: "day", y: "priceCeiling", stroke: gruv.blue})),
+      Plot.dot(simulationData, Plot.pointerX({x: "day", y: "priceFloor", stroke: gruv.red})),
+      Plot.text(simulationData, Plot.pointerX({px: "day", py: "poolRevnetTokenPrice", dy: -17, dx: 20, frameAnchor: "top-left", text: (d) => [`Day ${d.day}`, `AMM Price ${d.poolRevnetTokenPrice.toFixed(2)} ETH`, `Ceiling ${d.priceCeiling.toFixed(2)} ETH`, `Floor ${d.priceFloor.toFixed(2)} ETH`].join("   ")})),
       Plot.line(simulationData, {
         x: "day",
         y: "poolRevnetTokenPrice",
-        stroke: gruv.blue,
+        stroke: gruv.dark,
       }),
+      Plot.text(
+        simulationData,
+        Plot.selectLast({
+          x: "day",
+          y: "poolRevnetTokenPrice",
+          text: () => "AMM Price",
+          textAnchor: "start",
+          fill: gruv.dark,
+        })
+      ),
       Plot.line(simulationData, {
         x: "day",
         y: "priceCeiling",
-        stroke: gruv.green,
-        curve: "step",
+        stroke: gruv.blue,
+        curve: "step-after",
       }),
+      Plot.text(
+        simulationData,
+        Plot.selectLast({
+          x: "day",
+          y: "priceCeiling",
+          text: () => "Price Ceiling",
+          textAnchor: "start",
+          fill: gruv.blue,
+        })
+      ),
       Plot.line(simulationData, {
         x: "day",
         y: "priceFloor",
         stroke: gruv.red,
       }),
+      Plot.text(
+        simulationData,
+        Plot.selectLast({
+          x: "day",
+          y: "priceFloor",
+          text: () => "Price Floor",
+          textAnchor: "start",
+          fill: gruv.red,
+        })
+      ),
     ],
   });
 
-  dashboard.appendChild(plot);
+  let revnetBalancePlot = Plot.plot({
+    title: "Revnet Balances",
+    style: chartStyles,
+    x: { label: "Day" },
+    y: { label: "Token Supply", grid: true },
+    marks: [
+      Plot.ruleY([0]),
+      Plot.line(simulationData, {
+        x: "day",
+        y: "tokenSupply",
+        stroke: gruv.red,
+      }),
+      Plot.line(simulationData, {
+        x: "day",
+        y: "ethBalance",
+        stroke: gruv.blue,
+      }),
+    ],
+  });
+
+  dashboard.appendChild(tokenPricePlot);
+  dashboard.appendChild(revnetBalancePlot);
 }
 
 main();
+
+document.getElementById("simulate").addEventListener("click", main);
+
+// Automatically update simulation on input
+/* let timeoutId
+const inputs = document.querySelectorAll('input')
+inputs.forEach(input => {
+  input.addEventListener('input', () => {
+    if(timeoutId) clearTimeout(timeoutId)
+    timeoutId = setTimeout(main, 200)
+  })
+})*/
