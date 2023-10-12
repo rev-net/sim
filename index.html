@@ -4,80 +4,152 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Interactive Revnet</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div id="dashboard"></div>
     <div id="inputs">
       <section>
         <h2>Revnet Parameters</h2>
-        <input
-          type="number"
-          id="priceCeilingIncreasePercentage"
-          placeholder="Price Ceiling Increase Percentage"
-        />
+        <label for="priceCeilingIncreaseFrequencyInDays"
+          >Price Ceiling Increase Frequency In Days</label
+        >
         <input
           type="number"
           id="priceCeilingIncreaseFrequencyInDays"
-          placeholder="Price Ceiling Increase Frequency In Days"
+          value="1"
         />
+        <label for="priceCeilingIncreasePercentage"
+          >Price Ceiling Increase Percentage</label
+        >
         <input
-          type="number"
+          type="range"
+          id="priceCeilingIncreasePercentage"
+          value="0.02"
+          step="0.01"
+          min="0"
+          max="1"
+          oninput="updateSliderPercent(this)"
+        />
+        <div class="slider-values">
+          <span class="min-value">0%</span>
+          <span class="current-value">2%</span>
+          <span class="max-value">100%</span>
+        </div>
+        <label for="priceFloorTaxIntensity">Price Floor Tax Intensity</label>
+        <input
+          type="range"
           id="priceFloorTaxIntensity"
-          placeholder="Price Floor Tax Intensity"
+          value="0.33"
+          step="0.01"
+          min="0"
+          max="1"
+          oninput="updateSliderPercent(this)"
         />
-        <input type="number" id="premintAmount" placeholder="Premint Amount" />
-        <input type="number" id="boostPercent" placeholder="Boost Percent" />
+        <div class="slider-values">
+          <span class="min-value">0%</span>
+          <span class="current-value">33%</span>
+          <span class="max-value">100%</span>
+        </div>
+        <label for="boostPercent">Boost Percent</label>
         <input
-          type="number"
-          id="boostDurationInDays"
-          placeholder="Boost Duration In Days"
+          type="range"
+          id="boostPercent"
+          value="0.1"
+          step="0.01"
+          min="0"
+          max="1"
+          oninput="updateSliderPercent(this)"
         />
+        <div class="slider-values">
+          <span class="min-value">0%</span>
+          <span class="current-value">10%</span>
+          <span class="max-value">100%</span>
+        </div>
+        <label for="boostDurationInDays">Boost Duration In Days</label>
+        <input type="number" id="boostDurationInDays" value="30" />
+        <label for="premintAmount">Premint Amount</label>
+        <input type="number" id="premintAmount" value="5" />
       </section>
       <section>
         <h2>Liquidity Pool Parameters</h2>
-        <input type="number" id="eth" placeholder="Initial ETH" />
-        <input
-          type="number"
-          id="revnetToken"
-          placeholder="Initial Revnet Token"
-        />
+        <label for="eth">Initial ETH</label>
+        <input type="number" id="eth" value="10" />
+        <label for="revnetToken">Initial Revnet Token</label>
+        <input type="number" id="revnetToken" value="0" />
+        <button>Simulate</button>
       </section>
       <section>
         <h2>Simulation Metaparameters</h2>
+        <label for="daysToCalculate">Days To Calculate</label>
+        <input type="number" id="daysToCalculate" value="100" />
+        <label for="dailyTradesLambda">Daily Trades Lambda</label>
+        <input type="number" id="dailyTradesLambda" value="5" />
+        <label for="tradeAmountMean">Trade Amount Mean</label>
+        <input type="number" id="tradeAmountMean" value="0" />
+        <label for="tradeAmountVariance">Trade Amount Variance</label>
+        <input type="number" id="tradeAmountVariance" value="1.5" />
+        <label for="demandTrend">Demand Trend</label>
         <input
-          type="number"
-          id="daysToCalculate"
-          placeholder="Days To Calculate"
+          type="range"
+          id="demandTrend"
+          value="0.6"
+          step="0.01"
+          min="0"
+          max="1"
+          oninput="updateSliderPercent(this)"
         />
+        <div class="slider-values">
+          <span class="min-value">0%</span>
+          <span class="current-value">60%</span>
+          <span class="max-value">100%</span>
+        </div>
+        <label for="revnetTokenLiquidityRatio"
+          >Revnet Token Liquidity Ratio</label
+        >
         <input
-          type="number"
-          id="dailyTradesLambda"
-          placeholder="Daily Trades Lambda"
-        />
-        <input type="number" id="demandTrend" placeholder="Demand Trend" />
-        <input
-          type="number"
-          id="tradeAmountMean"
-          placeholder="Trade Amount Mean"
-        />
-        <input
-          type="number"
-          id="tradeAmountVariance"
-          placeholder="Trade Amount Variance"
-        />
-        <input
-          type="number"
+          type="range"
           id="revnetTokenLiquidityRatio"
-          placeholder="Revnet Token Liquidity Ratio"
+          value="0.1"
+          step="0.01"
+          min="0"
+          max="1"
+          oninput="updateSliderPercent(this)"
         />
+        <div class="slider-values">
+          <span class="min-value">0%</span>
+          <span class="current-value">10%</span>
+          <span class="max-value">100%</span>
+        </div>
+        <label for="ethLiquidityRatio">ETH Liquidity Ratio</label>
         <input
-          type="number"
+          type="range"
           id="ethLiquidityRatio"
-          placeholder="ETH Liquidity Ratio"
+          value="0.1"
+          step="0.01"
+          min="0"
+          max="1"
+          oninput="updateSliderPercent(this)"
         />
+        <div class="slider-values">
+          <span class="min-value">0%</span>
+          <span class="current-value">10%</span>
+          <span class="max-value">100%</span>
+        </div>
       </section>
     </div>
+    <div id="dashboard"></div>
+    <script>
+      function updateSliderPercent(slider) {
+        const currentValueSpan =
+          slider.nextElementSibling.querySelector(".current-value");
+        currentValueSpan.textContent = `${Math.floor(slider.value * 100)}%`;
+      }
+
+      document.querySelector("button").addEventListener("click", function () {
+        this.classList.add("dance");
+        setTimeout(() => this.classList.remove("dance"), 2000);
+      });
+    </script>
     <script type="module" src="/main.js"></script>
   </body>
 </html>

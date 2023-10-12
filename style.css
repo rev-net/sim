@@ -19,13 +19,88 @@
 
   background-color: var(--light);
   color: var(--dark);
+  font-family: "Times New Roman", Times, serif;
 }
 
 input {
   background-color: var(--light1);
-  color: var(--blue);
+  color: var(--dark);
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 5px;
 }
 
-input::placeholder {
-  color: var(--dark4);
+input[type="number"] {
+  width: 100px; /* Adjust as per your preference */
+}
+
+#inputs {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  border: 2px solid var(--dark);
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  background-color: var(--light2);
+}
+
+button {
+  background-color: var(--aqua);
+  color: var(--light);
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: block;
+  font-size: 16px;
+  margin: 120px auto 0;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  font-family: "Times New Roman", Times, serif;
+}
+
+button:hover {
+  background-color: var(--red);
+  color: var(--light);
+}
+
+@keyframes dance {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    transform: translateY(0) rotate(360deg); /* Full spin */
+  }
+}
+
+.dance {
+  animation: dance 2s ease-in-out; /* Increased duration for clarity */
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin: 0 10px;
+}
+
+label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.slider-values {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+}
+
+.min-value,
+.max-value,
+.current-value {
+  color: var(--dark2);
+}
+
+.current-value {
+  font-weight: bold;
 }
