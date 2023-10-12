@@ -480,8 +480,9 @@ function main() {
   let tokenPricePlot = Plot.plot({
     title: "Revnet Token Price",
     style: chartStyles,
-    x: { label: "Day" },
-    y: { label: "ETH", grid: true },
+    marginLeft: 0,
+    x: { label: "Day", insetLeft: 36 },
+    y: { label: "ETH (Ξ)", grid: true },
     marks: [
       Plot.ruleY([0]),
       Plot.ruleX(
@@ -492,7 +493,34 @@ function main() {
           stroke: solar.base01,
         })
       ),
-      Plot.text(simulationData, Plot.pointerX({px: "day", py: "poolRevnetTokenPrice", dy: -17, dx: 20, frameAnchor: "top-left", text: (d) => [`Day ${d.day}`, `AMM Price ${d.poolRevnetTokenPrice.toFixed(2)} ETH`, `Ceiling ${d.priceCeiling.toFixed(2)} ETH`, `Floor ${d.priceFloor.toFixed(2)} ETH`].join("   ")})),
+      Plot.gridY({
+        strokeDasharray: "0.75,2",
+        strokeOpacity: 1,
+      }),
+      Plot.axisY({
+        tickSize: 0,
+        dx: 38,
+        dy: -6,
+        lineAnchor: "bottom",
+        tickFormat: (d, i, _) => (i === _.length - 1 ? `${d} Ξ` : d),
+      }),
+      Plot.text(
+        simulationData,
+        Plot.pointerX({
+          px: "day",
+          py: "poolRevnetTokenPrice",
+          dy: -17,
+          dx: 90,
+          frameAnchor: "top-left",
+          text: (d) =>
+            [
+              `Day: ${d.day}`,
+              `AMM Price: ${d.poolRevnetTokenPrice.toFixed(2)} Ξ`,
+              `Ceiling: ${d.priceCeiling.toFixed(2)} Ξ`,
+              `Floor: ${d.priceFloor.toFixed(2)} Ξ`,
+            ].join("    "),
+        })
+      ),
       Plot.line(simulationData, {
         x: "day",
         y: "poolRevnetTokenPrice",
@@ -503,12 +531,20 @@ function main() {
         Plot.selectLast({
           x: "day",
           y: "poolRevnetTokenPrice",
+          dx: 3,
           text: () => "AMM Price",
           textAnchor: "start",
           fill: solar.blue,
         })
       ),
-      Plot.dot(simulationData, Plot.pointerX({x: "day", y: "poolRevnetTokenPrice", stroke: solar.blue})),
+      Plot.dot(
+        simulationData,
+        Plot.pointerX({
+          x: "day",
+          y: "poolRevnetTokenPrice",
+          stroke: solar.blue,
+        })
+      ),
       Plot.line(simulationData, {
         x: "day",
         y: "priceCeiling",
@@ -520,12 +556,16 @@ function main() {
         Plot.selectLast({
           x: "day",
           y: "priceCeiling",
+          dx: 3,
           text: () => "Price Ceiling",
           textAnchor: "start",
           fill: solar.green,
         })
       ),
-      Plot.dot(simulationData, Plot.pointerX({x: "day", y: "priceCeiling", stroke: solar.green})),
+      Plot.dot(
+        simulationData,
+        Plot.pointerX({ x: "day", y: "priceCeiling", stroke: solar.green })
+      ),
       Plot.line(simulationData, {
         x: "day",
         y: "priceFloor",
@@ -536,12 +576,16 @@ function main() {
         Plot.selectLast({
           x: "day",
           y: "priceFloor",
+          dx: 3,
           text: () => "Price Floor",
           textAnchor: "start",
           fill: solar.red,
         })
       ),
-      Plot.dot(simulationData, Plot.pointerX({x: "day", y: "priceFloor", stroke: solar.red})),
+      Plot.dot(
+        simulationData,
+        Plot.pointerX({ x: "day", y: "priceFloor", stroke: solar.red })
+      ),
     ],
   });
 
