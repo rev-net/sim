@@ -443,30 +443,29 @@ function simulate() {
   return simulationResults;
 }
 
-const gruv = {
-  light: "#fbf1c7",
-  light1: "#ebdbb2",
-  light2: "#d5c4a1",
-  light3: "#bdae93",
-  light4: "#a89984",
-  dark: "#282828",
-  dark1: "#3c3836",
-  dark2: "#504945",
-  dark3: "#665c54",
-  dark4: "#7c6f64",
-  red: "#fb4934",
-  green: "#b8bb26",
-  yellow: "#fabd2f",
-  blue: "#83a598",
-  purple: "#d3869b",
-  aqua: "#8ec07c",
-  orange: "#fe8019",
+const solar = {
+  base03: "#002b36",
+  base02: "#073642",
+  base01: "#586e75",
+  base00: "#657b83",
+  base0: "#839496",
+  base1: "#93a1a1",
+  base2: "#eee8d5",
+  base3: "#fdf6e3",
+  yellow: "#b58900",
+  orange: "#cb4b16",
+  red: "#dc322f",
+  magenta: "#d33682",
+  violet: "#6c71c4",
+  blue: "#268bd2",
+  cyan: "#2aa198",
+  green: "#859900",
 };
 
 const dashboard = document.getElementById("dashboard");
 const chartStyles = {
-  color: gruv.dark,
-  backgroundColor: gruv.light,
+  color: solar.base01,
+  backgroundColor: solar.base3,
   fontSize: "16px",
   fontFamily: "'Times New Roman', Times, serif",
   overflow: "visible",
@@ -490,17 +489,14 @@ function main() {
         Plot.pointerX({
           x: "day",
           py: "poolRevnetTokenPrice",
-          stroke: gruv.dark,
+          stroke: solar.base01,
         })
       ),
-      Plot.dot(simulationData, Plot.pointerX({x: "day", y: "poolRevnetTokenPrice", stroke: gruv.dark})),
-      Plot.dot(simulationData, Plot.pointerX({x: "day", y: "priceCeiling", stroke: gruv.blue})),
-      Plot.dot(simulationData, Plot.pointerX({x: "day", y: "priceFloor", stroke: gruv.red})),
       Plot.text(simulationData, Plot.pointerX({px: "day", py: "poolRevnetTokenPrice", dy: -17, dx: 20, frameAnchor: "top-left", text: (d) => [`Day ${d.day}`, `AMM Price ${d.poolRevnetTokenPrice.toFixed(2)} ETH`, `Ceiling ${d.priceCeiling.toFixed(2)} ETH`, `Floor ${d.priceFloor.toFixed(2)} ETH`].join("   ")})),
       Plot.line(simulationData, {
         x: "day",
         y: "poolRevnetTokenPrice",
-        stroke: gruv.dark,
+        stroke: solar.blue,
       }),
       Plot.text(
         simulationData,
@@ -509,13 +505,14 @@ function main() {
           y: "poolRevnetTokenPrice",
           text: () => "AMM Price",
           textAnchor: "start",
-          fill: gruv.dark,
+          fill: solar.blue,
         })
       ),
+      Plot.dot(simulationData, Plot.pointerX({x: "day", y: "poolRevnetTokenPrice", stroke: solar.blue})),
       Plot.line(simulationData, {
         x: "day",
         y: "priceCeiling",
-        stroke: gruv.blue,
+        stroke: solar.green,
         curve: "step-after",
       }),
       Plot.text(
@@ -525,13 +522,14 @@ function main() {
           y: "priceCeiling",
           text: () => "Price Ceiling",
           textAnchor: "start",
-          fill: gruv.blue,
+          fill: solar.green,
         })
       ),
+      Plot.dot(simulationData, Plot.pointerX({x: "day", y: "priceCeiling", stroke: solar.green})),
       Plot.line(simulationData, {
         x: "day",
         y: "priceFloor",
-        stroke: gruv.red,
+        stroke: solar.red,
       }),
       Plot.text(
         simulationData,
@@ -540,9 +538,10 @@ function main() {
           y: "priceFloor",
           text: () => "Price Floor",
           textAnchor: "start",
-          fill: gruv.red,
+          fill: solar.red,
         })
       ),
+      Plot.dot(simulationData, Plot.pointerX({x: "day", y: "priceFloor", stroke: solar.red})),
     ],
   });
 
@@ -550,18 +549,18 @@ function main() {
     title: "Revnet Balances",
     style: chartStyles,
     x: { label: "Day" },
-    y: { label: "Token Supply", grid: true },
+    y: { label: "Amount", grid: true },
     marks: [
       Plot.ruleY([0]),
       Plot.line(simulationData, {
         x: "day",
         y: "tokenSupply",
-        stroke: gruv.red,
+        stroke: solar.red,
       }),
       Plot.line(simulationData, {
         x: "day",
         y: "ethBalance",
-        stroke: gruv.blue,
+        stroke: solar.blue,
       }),
     ],
   });

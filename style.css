@@ -1,33 +1,33 @@
 :root {
-  --light: #fbf1c7;
-  --light1: #ebdbb2;
-  --light2: #d5c4a1;
-  --light3: #bdae93;
-  --light4: #a89984;
-  --dark: #282828;
-  --dark1: #3c3836;
-  --dark2: #504945;
-  --dark3: #665c54;
-  --dark4: #7c6f64;
-  --red: #fb4934;
-  --green: #b8bb26;
-  --yellow: #fabd2f;
-  --blue: #83a598;
-  --purple: #d3869b;
-  --aqua: #8ec07c;
-  --orange: #fe8019;
+  --base03: #002b36;
+  --base02: #073642;
+  --base01: #586e75;
+  --base00: #657b83;
+  --base0: #839496;
+  --base1: #93a1a1;
+  --base2: #eee8d5;
+  --base3: #fdf6e3;
+  --yellow: #b58900;
+  --orange: #cb4b16;
+  --red: #dc322f;
+  --magenta: #d33682;
+  --violet: #6c71c4;
+  --blue: #268bd2;
+  --cyan: #2aa198;
+  --green: #859900;
 
-  background-color: var(--light);
-  color: var(--dark);
+  background-color: var(--base3);
+  color: var(--base01);
   font-family: "Times New Roman", Times, serif;
 }
 
 input {
-  background-color: var(--light1);
-  color: var(--dark);
+  background-color: var(--base3);
+  color: var(--base02);
   width: 100%;
   margin-bottom: 10px;
   padding: 5px;
+  accent-color: var(--blue);
 }
 
 input[type="number"] {
@@ -38,16 +38,16 @@ input[type="number"] {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  border: 2px solid var(--dark);
+  border: 2px solid var(--base01);
   padding: 10px;
   border-radius: 5px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-  background-color: var(--light2);
+  background-color: var(--base2);
 }
 
 #simulate {
-  background-color: var(--aqua);
-  color: var(--light);
+  background-color: var(--base01);
+  color: var(--base3);
   padding: 15px 32px;
   text-align: center;
   text-decoration: none;
@@ -60,8 +60,7 @@ input[type="number"] {
 }
 
 #simulate:hover {
-  background-color: var(--red);
-  color: var(--light);
+  background-color: var(--cyan);
 }
 
 @keyframes dance {
@@ -92,13 +91,7 @@ label {
 .slider-values {
   display: flex;
   justify-content: space-between;
-  font-size: 0.8rem;
-}
-
-.min-value,
-.max-value,
-.current-value {
-  color: var(--dark2);
+  font-size: 0.9rem;
 }
 
 .current-value {
