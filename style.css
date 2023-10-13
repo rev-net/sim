@@ -97,3 +97,15 @@ label {
 .current-value {
   font-weight: bold;
 }
+
+#dashboard {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+}
+
+/*#dashboard > svg {
+  flex: 0 0 50%;
+  margin-bottom: 20px;
+}*/

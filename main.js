@@ -482,7 +482,7 @@ function main() {
     style: chartStyles,
     marginLeft: 0,
     x: { label: "Day", insetLeft: 36 },
-    y: { label: "ETH (Ξ)", grid: true },
+    y: { label: "ETH (Ξ)" },
     marks: [
       Plot.ruleY([0]),
       Plot.ruleX(
@@ -502,7 +502,7 @@ function main() {
         dx: 38,
         dy: -6,
         lineAnchor: "bottom",
-        tickFormat: (d, i, _) => (i === _.length - 1 ? `${d} Ξ` : d),
+        tickFormat: (d, i, t) => (i === t.length - 1 ? `Ξ ${d}` : d),
       }),
       Plot.text(
         simulationData,
@@ -589,28 +589,217 @@ function main() {
     ],
   });
 
-  let revnetBalancePlot = Plot.plot({
+  let revnetPlot = Plot.plot({
     title: "Revnet Balances",
     style: chartStyles,
     x: { label: "Day" },
     y: { label: "Amount", grid: true },
     marks: [
+      Plot.text(
+        simulationData,
+        Plot.pointerX({
+          px: "day",
+          dy: -17,
+          dx: 60,
+          frameAnchor: "top-left",
+          text: (d) =>
+            [
+              `Day: ${d.day}`,
+              `Token Supply: ${d.tokenSupply.toFixed(2)}`,
+              `ETH Balance: ${d.ethBalance.toFixed(2)} Ξ`,
+            ].join("     "),
+        })
+      ),
       Plot.ruleY([0]),
+      Plot.ruleX(
+        simulationData,
+        Plot.pointerX({
+          x: "day",
+          stroke: solar.base01,
+        })
+      ),
       Plot.line(simulationData, {
         x: "day",
         y: "tokenSupply",
         stroke: solar.red,
       }),
+      Plot.text(
+        simulationData,
+        Plot.selectLast({
+          x: "day",
+          y: "tokenSupply",
+          dx: 3,
+          text: () => "Token Supply",
+          textAnchor: "start",
+          fill: solar.red,
+        })
+      ),
+      Plot.dot(
+        simulationData,
+        Plot.pointerX({
+          x: "day",
+          y: "tokenSupply",
+          stroke: solar.red,
+        })
+      ),
       Plot.line(simulationData, {
         x: "day",
         y: "ethBalance",
         stroke: solar.blue,
       }),
+      Plot.text(
+        simulationData,
+        Plot.selectLast({
+          x: "day",
+          y: "ethBalance",
+          dx: 3,
+          text: () => "ETH Balance",
+          textAnchor: "start",
+          fill: solar.blue,
+        })
+      ),
+      Plot.dot(
+        simulationData,
+        Plot.pointerX({
+          x: "day",
+          y: "ethBalance",
+          stroke: solar.blue,
+        })
+      ),
     ],
   });
 
+  let liquidityPoolPlot = Plot.plot({
+    title: "Liquidity Pool",
+    style: chartStyles,
+    x: { label: "Day" },
+    y: { label: "Amount", grid: true },
+    marks: [
+      Plot.text(
+        simulationData,
+        Plot.pointerX({
+          px: "day",
+          dy: -17,
+          dx: 50,
+          frameAnchor: "top-left",
+          text: (d) =>
+            [
+              `Day: ${d.day}`,
+              `Token Liquidity: ${d.poolRevnetTokenBalance.toFixed(2)}`,
+              `ETH Liquidity: ${d.poolEthBalance.toFixed(2)} Ξ`,
+            ].join("    "),
+        })
+      ),
+      Plot.ruleY([0]),
+      Plot.ruleX(
+        simulationData,
+        Plot.pointerX({
+          x: "day",
+          stroke: solar.base01,
+        })
+      ),
+      Plot.line(simulationData, {
+        x: "day",
+        y: "poolRevnetTokenBalance",
+        stroke: solar.red,
+      }),
+      Plot.text(
+        simulationData,
+        Plot.selectLast({
+          x: "day",
+          y: "poolRevnetTokenBalance",
+          dx: 3,
+          text: () => "Token Liquidity",
+          textAnchor: "start",
+          fill: solar.red,
+        })
+      ),
+      Plot.dot(
+        simulationData,
+        Plot.pointerX({
+          x: "day",
+          y: "poolRevnetTokenBalance",
+          stroke: solar.red,
+        })
+      ),
+      Plot.line(simulationData, {
+        x: "day",
+        y: "poolEthBalance",
+        stroke: solar.blue,
+      }),
+      Plot.text(
+        simulationData,
+        Plot.selectLast({
+          x: "day",
+          y: "poolEthBalance",
+          dx: 3,
+          text: () => "ETH Liquidity",
+          textAnchor: "start",
+          fill: solar.blue,
+        })
+      ),
+      Plot.dot(
+        simulationData,
+        Plot.pointerX({
+          x: "day",
+          y: "poolEthBalance",
+          stroke: solar.blue,
+        })
+      ),
+    ],
+  });
+
+  let boostPlot = Plot.plot({
+    title: "Tokens Sent to Boost",
+    style: chartStyles,
+    x: { label: "Day" },
+    y: { label: "Tokens", grid: true },
+    marks: [
+      Plot.text(
+        simulationData,
+        Plot.pointerX({
+          px: "day",
+          py: "tokensSentToBoost",
+          dy: -17,
+          dx: 40,
+          frameAnchor: "top-left",
+          text: (d) =>
+            [
+              `Day: ${d.day}`,
+              `Tokens sent: ${d.tokensSentToBoost.toFixed(2)}`,
+            ].join("    "),
+        })
+      ),
+      Plot.ruleY([0]),
+      Plot.ruleX(
+        simulationData,
+        Plot.pointerX({
+          x: "day",
+          stroke: solar.red,
+        })
+      ),
+      Plot.dot(
+        simulationData,
+        Plot.pointerX({
+          x: "day",
+          y: "tokensSentToBoost",
+          stroke: solar.red,
+        })
+      ),
+      Plot.line(simulationData, {
+        x: "day",
+        y: "tokensSentToBoost",
+        stroke: solar.red,
+      }),
+    ],
+  });
+
+  // let tradesPlot = Plot.plot({})
+
   dashboard.appendChild(tokenPricePlot);
-  dashboard.appendChild(revnetBalancePlot);
+  dashboard.appendChild(revnetPlot);
+  dashboard.appendChild(liquidityPoolPlot)
+  dashboard.appendChild(boostPlot);
 }
 
 main();
