@@ -413,6 +413,7 @@ function simulate() {
     boostDurationInDays
   );
   const p = new LiquidityPool(eth, revnetToken);
+  if (revnetToken) r.tokenSupply += revnetToken; // Add initial liquidity pool supply to outstanding token supply.
   const traders = [];
   const simulationResults = [];
 
@@ -433,7 +434,7 @@ function simulate() {
     traders.forEach((t) => {
       if (Math.random() < saleProbability) {
         let ethReceived = sellRevnetTokens(
-          t.purchase.revnetTokensPurchased,
+          t.purchase.revnetTokensPurchased * (1 - revnetTokenLiquidityRatio),
           r,
           p,
           t
@@ -463,6 +464,13 @@ function simulate() {
 
   return [simulationResults, traders];
 }
+
+/*
+ * TODO:
+ * Make LP more realistic. Make traders "intelligent".
+ * Plot traders and trades
+ * Descriptions for parameters
+ */
 
 const solar = {
   base03: "#002b36",
@@ -814,16 +822,14 @@ function main() {
       }),
     ],
   });
-  
+
   // TODO
   let traderPlot = Plot.plot({
     title: "Traders",
     style: chartStyles,
     x: { label: "Day" },
     y: { label: "Amount", grid: true },
-    marks: [
-      Plot.ruleY([0]),
-    ],
+    marks: [Plot.ruleY([0])],
   });
 
   dashboard.appendChild(tokenPricePlot);
@@ -838,11 +844,11 @@ main();
 document.getElementById("simulate").addEventListener("click", main);
 
 // Automatically update simulation on input
-/* let timeoutId
-const inputs = document.querySelectorAll('input')
-inputs.forEach(input => {
-  input.addEventListener('input', () => {
-    if(timeoutId) clearTimeout(timeoutId)
-    timeoutId = setTimeout(main, 200)
-  })
-})*/
+let timeoutId;
+const inputs = document.querySelectorAll("input");
+inputs.forEach((input) => {
+  input.addEventListener("input", () => {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(main, 100);
+  });
+});
