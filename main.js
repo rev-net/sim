@@ -432,6 +432,7 @@ function simulate() {
 
     // Make sales
     traders.forEach((t) => {
+      if(t.sale) return
       if (Math.random() < saleProbability) {
         let ethReceived = sellRevnetTokens(
           t.purchase.revnetTokensPurchased * (1 - revnetTokenLiquidityRatio),
