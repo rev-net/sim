@@ -114,17 +114,17 @@
         <h2>Simulation Metaparameters</h2>
         <label for="daysToCalculate">Days To Calculate</label>
         <input type="number" id="daysToCalculate" value="100" />
-        <label for="dailyTradesLambda">Daily Trades Lambda</label>
-        <input type="number" id="dailyTradesLambda" value="5" />
-        <label for="tradeAmountMean">Trade Amount Mean</label>
-        <input type="number" id="tradeAmountMean" value="0" />
-        <label for="tradeAmountVariance">Trade Amount Variance</label>
-        <input type="number" id="tradeAmountVariance" value="1.5" />
-        <label for="demandTrend">Demand Trend</label>
+        <label for="dailyPurchasesLambda">Daily Purchases Lambda</label>
+        <input type="number" id="dailyPurchasesLambda" value="5" />
+        <label for="purchaseAmountMean">Purchase Amount Mean</label>
+        <input type="number" id="purchaseAmountMean" value="0" />
+        <label for="purchaseAmountVariance">Purchase Amount Variance</label>
+        <input type="number" id="purchaseAmountVariance" value="1.5" />
+        <label for="saleProbability">Sale Probability</label>
         <input
           type="range"
-          id="demandTrend"
-          value="0.6"
+          id="saleProbability"
+          value="0.01"
           step="0.01"
           min="0"
           max="1"
@@ -132,7 +132,7 @@
         />
         <div class="slider-values">
           <span class="min-value">0%</span>
-          <span class="current-value">60%</span>
+          <span class="current-value">1%</span>
           <span class="max-value">100%</span>
         </div>
       </section>

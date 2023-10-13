@@ -233,22 +233,38 @@ class Revnet {
   }
 }
 
+class Trader {
+  recordPurchase(ethSpent, revnetTokensPurchased, source, day) {
+    this.purchase = { ethSpent, revnetTokensPurchased, source, day };
+  }
+
+  recordSale(revnetTokensSpent, ethReceived, source, day) {
+    this.sale = { revnetTokensSpent, ethReceived, source, day };
+  }
+}
+
 /**
  * Function to purchase Revnet tokens, routing payments to the most cost-effective option.
  * @param {number} ethSpent - The amount of ETH spent to purchase tokens.
  * @param {object} r - The Revnet object.
  * @param {object} p - The LiquidityPool object.
+ * @param {object} t - The Trader object.
  * @returns {number} - The number of tokens purchased.
  */
-function purchaseRevnetTokens(ethSpent, r, p) {
+function purchaseRevnetTokens(ethSpent, r, p, t) {
+  let source, revnetTokensPurchased;
   if (
     p.revnetToken > p.getRevnetTokenReturn(ethSpent) &&
     p.getRevnetTokenReturn(ethSpent) > r.getTokensCreatedPerEth() * ethSpent
   ) {
-    return p.buyRevnetTokens(ethSpent);
+    revnetTokensPurchased = p.buyRevnetTokens(ethSpent);
+    source = "pool";
   } else {
-    return r.createTokensAtCeiling(ethSpent);
+    revnetTokensPurchased = r.createTokensAtCeiling(ethSpent);
+    source = "revnet";
   }
+  t.recordPurchase(ethSpent, revnetTokensPurchased, source, r.day);
+  return revnetTokensPurchased;
 }
 
 /**
@@ -256,18 +272,25 @@ function purchaseRevnetTokens(ethSpent, r, p) {
  * @param {number} revnetTokensSpent - The amount of Revnet tokens spent to sell.
  * @param {object} r - The Revnet object.
  * @param {object} p - The LiquidityPool object.
+ * @param {object} t - The Trader object.
  * @returns {number} - The amount of ETH received from selling tokens.
  */
-function sellRevnetTokens(revnetTokensSpent, r, p) {
+function sellRevnetTokens(revnetTokensSpent, r, p, t) {
+  let source,
+    ethReceived = 0;
   if (
     p.eth > p.getEthReturn(revnetTokensSpent) &&
     p.getEthReturn(revnetTokensSpent) > r.getEthReclaimAmount(revnetTokensSpent)
   ) {
-    return p.buyEth(revnetTokensSpent);
+    source = "pool";
+    ethReceived = p.buyEth(revnetTokensSpent);
   } else if (r.getEthReclaimAmount(revnetTokensSpent) < r.ethBalance) {
-    return r.destroyTokensAtFloor(revnetTokensSpent);
+    source = "revnet";
+    ethReceived = r.destroyTokensAtFloor(revnetTokensSpent);
   }
-  return 0;
+
+  if (source) t.recordSale(revnetTokensSpent, ethReceived, source, r.day);
+  return ethReceived;
 }
 
 function poissonRandomNumber(lambda) {
@@ -316,10 +339,9 @@ function randomTrial() {
 /*
 const daysToCalculate = 100; // The number of days to simulate for (10 - 100)
 const dailyTradesLambda = 5; // The lambda used in a poisson distribution for the number of daily trades
-const demandTrend = 0.6; // 0 to 1: The overall trend of price changes (<0.5 downward, >0.5 upward).
 
-const tradeAmountMean = 0; // The lognorm mean for the amount in a trade
-const tradeAmountVariance = 1.5; // The lognorm variance for the amount in a trade
+const purchaseAmountMean = 0; // The lognorm mean for the amount in a trade
+const purchaseAmountVariance = 1.5; // The lognorm variance for the amount in a trade
 
 const revnetTokenLiquidityRatio = 0.1; // The percentage of tokens made available on secondary markets once they are purchased.
 const ethLiquidityRatio = 0.1; // The percentage of eth made available on secondary markets once it is purchased
@@ -346,21 +368,23 @@ function simulate() {
   let daysToCalculate = Number(
     document.getElementById("daysToCalculate").value
   );
-  let dailyTradesLambda = Number(
-    document.getElementById("dailyTradesLambda").value
+  let dailyPurchasesLambda = Number(
+    document.getElementById("dailyPurchasesLambda").value
   );
-  let tradeAmountMean = Number(
-    document.getElementById("tradeAmountMean").value
+  let purchaseAmountMean = Number(
+    document.getElementById("purchaseAmountMean").value
   );
-  let tradeAmountVariance = Number(
-    document.getElementById("tradeAmountVariance").value
+  let purchaseAmountVariance = Number(
+    document.getElementById("purchaseAmountVariance").value
   );
-  let demandTrend = Number(document.getElementById("demandTrend").value);
   let revnetTokenLiquidityRatio = Number(
     document.getElementById("revnetTokenLiquidityRatio").value
   );
   let ethLiquidityRatio = Number(
     document.getElementById("ethLiquidityRatio").value
+  );
+  let saleProbability = Number(
+    document.getElementById("saleProbability").value
   );
   console.table({
     priceCeilingIncreaseFrequencyInDays,
@@ -372,12 +396,12 @@ function simulate() {
     eth,
     revnetToken,
     daysToCalculate,
-    dailyTradesLambda,
-    tradeAmountMean,
-    tradeAmountVariance,
-    demandTrend,
+    dailyPurchasesLambda,
+    purchaseAmountMean,
+    purchaseAmountVariance,
     revnetTokenLiquidityRatio,
     ethLiquidityRatio,
+    saleProbability,
   });
 
   const r = new Revnet(
@@ -389,38 +413,36 @@ function simulate() {
     boostDurationInDays
   );
   const p = new LiquidityPool(eth, revnetToken);
+  const traders = [];
   const simulationResults = [];
 
   for (; r.day < daysToCalculate; r.incrementDay()) {
-    let trades = [];
-    for (let i = 0; i < poissonRandomNumber(dailyTradesLambda); i++) {
-      let tradeAmount = logNormRandomNumber(
-        tradeAmountMean,
-        tradeAmountVariance
+    // Make purchases
+    for (let i = 0; i < poissonRandomNumber(dailyPurchasesLambda); i++) {
+      let t = new Trader();
+      let ethSpent = logNormRandomNumber(
+        purchaseAmountMean,
+        purchaseAmountVariance
       );
-      if (Math.random() < demandTrend) {
-        let revnetTokensPurchased = purchaseRevnetTokens(tradeAmount, r, p);
-        p.provideRevnetTokens(
-          revnetTokenLiquidityRatio * revnetTokensPurchased
-        );
-        trades.push({
-          trade: i,
-          type: "buy",
-          spent: tradeAmount,
-          received: revnetTokensPurchased,
-        });
-      } else {
-        let ethPurchased = sellRevnetTokens(tradeAmount, r, p);
-        p.provideEth(ethLiquidityRatio * ethPurchased);
-        trades.push({
-          trade: i,
-          type: "sell",
-          spent: tradeAmount,
-          received: ethPurchased,
-        });
-      }
+      let revnetTokensPurchased = purchaseRevnetTokens(ethSpent, r, p, t);
+      p.provideRevnetTokens(revnetTokenLiquidityRatio * revnetTokensPurchased);
+      traders.push(t);
     }
 
+    // Make sales
+    traders.forEach((t) => {
+      if (Math.random() < saleProbability) {
+        let ethReceived = sellRevnetTokens(
+          t.purchase.revnetTokensPurchased,
+          r,
+          p,
+          t
+        );
+        p.provideEth(ethLiquidityRatio * ethReceived);
+      }
+    });
+
+    // Record results
     simulationResults.push({
       day: r.day,
       ethBalance: r.ethBalance,
@@ -434,13 +456,12 @@ function simulate() {
       poolEthBalance: p.eth,
       poolRevnetTokenBalance: p.revnetToken,
       poolRevnetTokenPrice: p.getMarginalPriceOfRevnetToken(),
-      trades,
     });
   }
 
-  console.table(simulationResults);
+  console.table(simulationResults, traders);
 
-  return simulationResults;
+  return [simulationResults, traders];
 }
 
 const solar = {
@@ -474,7 +495,7 @@ function main() {
   dashboard.innerHTML = "";
 
   console.time("simulate");
-  let simulationData = simulate();
+  let [simulationData, traders] = simulate();
   console.timeEnd("simulate");
 
   let tokenPricePlot = Plot.plot({
@@ -670,7 +691,7 @@ function main() {
   });
 
   let liquidityPoolPlot = Plot.plot({
-    title: "Liquidity Pool",
+    title: "Liquidity Pool Balances",
     style: chartStyles,
     x: { label: "Day" },
     y: { label: "Amount", grid: true },
@@ -750,7 +771,7 @@ function main() {
   });
 
   let boostPlot = Plot.plot({
-    title: "Tokens Sent to Boost",
+    title: "Cumulative Tokens Sent to Boost",
     style: chartStyles,
     x: { label: "Day" },
     y: { label: "Tokens", grid: true },
@@ -793,13 +814,23 @@ function main() {
       }),
     ],
   });
-
-  // let tradesPlot = Plot.plot({})
+  
+  // TODO
+  let traderPlot = Plot.plot({
+    title: "Traders",
+    style: chartStyles,
+    x: { label: "Day" },
+    y: { label: "Amount", grid: true },
+    marks: [
+      Plot.ruleY([0]),
+    ],
+  });
 
   dashboard.appendChild(tokenPricePlot);
   dashboard.appendChild(revnetPlot);
-  dashboard.appendChild(liquidityPoolPlot)
+  dashboard.appendChild(liquidityPoolPlot);
   dashboard.appendChild(boostPlot);
+  dashboard.appendChild(traderPlot);
 }
 
 main();
