@@ -198,7 +198,6 @@ class Revnet {
   }
 
   /**
-   * TODO
    * Get the number of tokens you need to destroy to reclaim a given amount of ETH.
    * @param {number} ethAmount The amount of ETH returned.
    * @return {number} The token price floor, or the number of tokens needed to reclaim ethAmount.
@@ -252,19 +251,18 @@ class Trader {
  * @returns {number} - The number of tokens purchased.
  */
 function purchaseRevnetTokens(ethSpent, r, p, t) {
-  let source, revnetTokensPurchased;
+  let source, revnetTokensReceived;
   if (
     p.revnetToken > p.getRevnetTokenReturn(ethSpent) &&
     p.getRevnetTokenReturn(ethSpent) > r.getTokensCreatedPerEth() * ethSpent
   ) {
-    revnetTokensPurchased = p.buyRevnetTokens(ethSpent);
+    revnetTokensReceived = p.buyRevnetTokens(ethSpent);
     source = "pool";
   } else {
-    revnetTokensPurchased = r.createTokensAtCeiling(ethSpent);
+    revnetTokensReceived = r.createTokensAtCeiling(ethSpent);
     source = "revnet";
   }
-  t.recordPurchase(ethSpent, revnetTokensPurchased, source, r.day);
-  return revnetTokensPurchased;
+  return { revnetTokensReceived, source };
 }
 
 /**
@@ -288,6 +286,8 @@ function sellRevnetTokens(revnetTokensSpent, r, p, t) {
     source = "revnet";
     ethReceived = r.destroyTokensAtFloor(revnetTokensSpent);
   }
+
+  return { ethReceived, source };
 
   if (source) t.recordSale(revnetTokensSpent, ethReceived, source, r.day);
   return ethReceived;
@@ -419,28 +419,41 @@ function simulate() {
 
   for (; r.day < daysToCalculate; r.incrementDay()) {
     // Make purchases
+    let dailyPurchases = [];
     for (let i = 0; i < poissonRandomNumber(dailyPurchasesLambda); i++) {
       let t = new Trader();
       let ethSpent = logNormRandomNumber(
         purchaseAmountMean,
         purchaseAmountVariance
       );
-      let revnetTokensPurchased = purchaseRevnetTokens(ethSpent, r, p, t);
-      p.provideRevnetTokens(revnetTokenLiquidityRatio * revnetTokensPurchased);
+      let { revnetTokensReceived, source } = purchaseRevnetTokens(
+        ethSpent,
+        r,
+        p,
+        t
+      );
+      t.recordPurchase(ethSpent, revnetTokensReceived, source, r.day);
+      p.provideRevnetTokens(revnetTokenLiquidityRatio * revnetTokensReceived);
       traders.push(t);
+      dailyPurchases.push({ ethSpent, revnetTokensReceived, source });
     }
 
     // Make sales
+    let dailySales = [];
     traders.forEach((t) => {
-      if(t.sale) return
+      if (t.sale) return;
       if (Math.random() < saleProbability) {
-        let ethReceived = sellRevnetTokens(
-          t.purchase.revnetTokensPurchased * (1 - revnetTokenLiquidityRatio),
+        let revnetTokensSpent =
+          t.purchase.revnetTokensPurchased * (1 - revnetTokenLiquidityRatio);
+        let { ethReceived, source } = sellRevnetTokens(
+          revnetTokensSpent,
           r,
           p,
           t
         );
+        t.recordSale(revnetTokensSpent, ethReceived, source, r.day);
         p.provideEth(ethLiquidityRatio * ethReceived);
+        dailySales.push({ revnetTokensSpent, ethReceived, source });
       }
     });
 
@@ -458,6 +471,8 @@ function simulate() {
       poolEthBalance: p.eth,
       poolRevnetTokenBalance: p.revnetToken,
       poolRevnetTokenPrice: p.getMarginalPriceOfRevnetToken(),
+      dailyPurchases,
+      dailySales,
     });
   }
 
@@ -471,6 +486,7 @@ function simulate() {
  * Make LP more realistic. Make traders "intelligent".
  * Plot traders and trades
  * Descriptions for parameters
+ * Double check price floor logic
  */
 
 const solar = {
@@ -504,6 +520,7 @@ function main() {
   dashboard.innerHTML = "";
 
   console.time("simulate");
+
   let [simulationData, traders] = simulate();
   console.timeEnd("simulate");
 
@@ -824,20 +841,115 @@ function main() {
     ],
   });
 
-  // TODO
-  let traderPlot = Plot.plot({
-    title: "Traders",
+  const purchases = simulationData.flatMap((v) =>
+    v.dailyPurchases.map((p) => {
+      return { day: v.day, ...p };
+    })
+  );
+
+  const sales = simulationData.flatMap((v) =>
+    v.dailySales.map((s) => {
+      return { day: v.day, ...s };
+    })
+  );
+
+  let cumulativeVolumesPlot = Plot.plot({
+    title: "Cumulative Volumes",
     style: chartStyles,
     x: { label: "Day" },
     y: { label: "Amount", grid: true },
-    marks: [Plot.ruleY([0])],
+    marks: [
+      Plot.text(purchases, Plot.pointerX({
+        px: "day",
+        dy: -17,
+        dx: 50,
+        frameAnchor: "top-left",
+        text: (d) => [
+          `Day: ${d.day}`,
+          ``
+        ].join("    ")
+      })),
+      Plot.ruleY([0]),
+      Plot.ruleX(purchases, Plot.pointerX({
+        x: "day",
+        stroke: solar.base02,
+      })),
+      Plot.line(
+        purchases,
+        Plot.mapY("cumsum", {
+          x: "day",
+          y: "ethSpent",
+          stroke: solar.blue,
+        })
+      ),
+      Plot.text(
+        purchases,
+        Plot.selectLast(
+          Plot.mapY("cumsum", {
+            x: "day",
+            y: "ethSpent",
+            dx: 3,
+            text: () => "ETH Spent",
+            textAnchor: "start",
+            fill: solar.blue,
+          })
+        )
+      ),
+      Plot.line(
+        purchases,
+        Plot.mapY("cumsum", {
+          x: "day",
+          y: "revnetTokensReceived",
+          stroke: solar.red,
+        })
+      ),
+      Plot.text(
+        purchases,
+        Plot.selectLast(
+          Plot.mapY("cumsum", {
+            x: "day",
+            y: "revnetTokensReceived",
+            dx: 3,
+            text: () => "Tokens Purchased",
+            textAnchor: "start",
+            fill: solar.red,
+          })
+        )
+      ),
+      Plot.line(sales, Plot.mapY("cumsum", {
+        x: "day",
+        y: "revnetTokensSpent",
+        stroke: solar.green,
+      })),
+      Plot.text(sales, Plot.selectLast(Plot.mapY("cumsum", {
+        x: "day",
+        y: "revnetTokensSpent",
+        dx: 3,
+        text: () => "Tokens Sold",
+        textAnchor: "start",
+        fill: solar.green
+      }))),
+      Plot.line(sales, Plot.mapY("cumsum", {
+        x: "day",
+        y: "ethReceived",
+        stroke: solar.cyan,
+      })),
+      Plot.text(sales, Plot.selectLast(Plot.mapY("cumsum", {
+        x: "day",
+        y: "ethReceived",
+        dx: 3,
+        text: () => "ETH Received From Sales",
+        textAnchor: "start",
+        fill: solar.cyan,
+      })))
+    ],
   });
 
   dashboard.appendChild(tokenPricePlot);
   dashboard.appendChild(revnetPlot);
   dashboard.appendChild(liquidityPoolPlot);
   dashboard.appendChild(boostPlot);
-  dashboard.appendChild(traderPlot);
+  dashboard.appendChild(cumulativeVolumesPlot);
 }
 
 main();
