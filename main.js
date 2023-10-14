@@ -555,7 +555,6 @@ function main() {
         simulationData,
         Plot.pointerX({
           px: "day",
-          py: "poolRevnetTokenPrice",
           dy: -17,
           dx: 90,
           frameAnchor: "top-left",
@@ -584,14 +583,6 @@ function main() {
           fill: solar.blue,
         })
       ),
-      Plot.dot(
-        simulationData,
-        Plot.pointerX({
-          x: "day",
-          y: "poolRevnetTokenPrice",
-          stroke: solar.blue,
-        })
-      ),
       Plot.line(simulationData, {
         x: "day",
         y: "priceCeiling",
@@ -609,10 +600,6 @@ function main() {
           fill: solar.green,
         })
       ),
-      Plot.dot(
-        simulationData,
-        Plot.pointerX({ x: "day", y: "priceCeiling", stroke: solar.green })
-      ),
       Plot.line(simulationData, {
         x: "day",
         y: "priceFloor",
@@ -629,10 +616,6 @@ function main() {
           fill: solar.red,
         })
       ),
-      Plot.dot(
-        simulationData,
-        Plot.pointerX({ x: "day", y: "priceFloor", stroke: solar.red })
-      ),
     ],
   });
 
@@ -646,9 +629,8 @@ function main() {
         simulationData,
         Plot.pointerX({
           px: "day",
-          dy: -17,
-          dx: 60,
-          frameAnchor: "top-left",
+          dy: -18,
+          frameAnchor: "top-right",
           text: (d) =>
             [
               `Day: ${d.day}`,
@@ -681,14 +663,6 @@ function main() {
           fill: solar.red,
         })
       ),
-      Plot.dot(
-        simulationData,
-        Plot.pointerX({
-          x: "day",
-          y: "tokenSupply",
-          stroke: solar.red,
-        })
-      ),
       Plot.line(simulationData, {
         x: "day",
         y: "ethBalance",
@@ -705,14 +679,6 @@ function main() {
           fill: solar.blue,
         })
       ),
-      Plot.dot(
-        simulationData,
-        Plot.pointerX({
-          x: "day",
-          y: "ethBalance",
-          stroke: solar.blue,
-        })
-      ),
     ],
   });
 
@@ -726,9 +692,8 @@ function main() {
         simulationData,
         Plot.pointerX({
           px: "day",
-          dy: -17,
-          dx: 50,
-          frameAnchor: "top-left",
+          dy: -18,
+          frameAnchor: "top-right",
           text: (d) =>
             [
               `Day: ${d.day}`,
@@ -761,14 +726,6 @@ function main() {
           fill: solar.red,
         })
       ),
-      Plot.dot(
-        simulationData,
-        Plot.pointerX({
-          x: "day",
-          y: "poolRevnetTokenBalance",
-          stroke: solar.red,
-        })
-      ),
       Plot.line(simulationData, {
         x: "day",
         y: "poolEthBalance",
@@ -785,14 +742,6 @@ function main() {
           fill: solar.blue,
         })
       ),
-      Plot.dot(
-        simulationData,
-        Plot.pointerX({
-          x: "day",
-          y: "poolEthBalance",
-          stroke: solar.blue,
-        })
-      ),
     ],
   });
 
@@ -807,9 +756,8 @@ function main() {
         Plot.pointerX({
           px: "day",
           py: "tokensSentToBoost",
-          dy: -17,
-          dx: 40,
-          frameAnchor: "top-left",
+          dy: -18,
+          frameAnchor: "top-right",
           text: (d) =>
             [
               `Day: ${d.day}`,
@@ -822,15 +770,7 @@ function main() {
         simulationData,
         Plot.pointerX({
           x: "day",
-          stroke: solar.red,
-        })
-      ),
-      Plot.dot(
-        simulationData,
-        Plot.pointerX({
-          x: "day",
-          y: "tokensSentToBoost",
-          stroke: solar.red,
+          stroke: solar.base01,
         })
       ),
       Plot.line(simulationData, {
@@ -861,9 +801,8 @@ function main() {
     marks: [
       Plot.text(purchases, Plot.pointerX({
         px: "day",
-        dy: -17,
-        dx: 50,
-        frameAnchor: "top-left",
+        dy: -18,
+        frameAnchor: "top-right",
         text: (d) => [
           `Day: ${d.day}`,
           ``
@@ -872,7 +811,7 @@ function main() {
       Plot.ruleY([0]),
       Plot.ruleX(purchases, Plot.pointerX({
         x: "day",
-        stroke: solar.base02,
+        stroke: solar.base01,
       })),
       Plot.line(
         purchases,
