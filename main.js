@@ -222,8 +222,8 @@ class Revnet {
 }
 
 class Trader {
-  recordPurchase(ethSpent, revnetTokensPurchased, source, day) {
-    this.purchase = { ethSpent, revnetTokensPurchased, source, day };
+  recordPurchase(ethSpent, revnetTokensReceived, source, day) {
+    this.purchase = { ethSpent, revnetTokensReceived, source, day };
   }
 
   recordSale(revnetTokensSpent, ethReceived, source, day) {
@@ -416,7 +416,7 @@ function simulate() {
       if (t.sale) return;
       if (Math.random() < saleProbability) {
         let revnetTokensSpent =
-          t.purchase.revnetTokensPurchased * (1 - revnetTokenLiquidityRatio);
+          t.purchase.revnetTokensReceived * (1 - revnetTokenLiquidityRatio);
         let { ethReceived, source } = sellRevnetTokens(
           revnetTokensSpent,
           r,
@@ -764,7 +764,7 @@ function main() {
     })
   );
 
-  let cumsum = [];
+  let cumulativeTrades = [];
   let purchasesCopy = purchases.slice();
   let salesCopy = sales.slice();
   for (let i = 0; i < simulationData.length; i++) {
@@ -776,7 +776,7 @@ function main() {
             revnetTokensSpent: 0,
             ethReceived: 0,
           }
-        : cumsum[i - 1];
+        : cumulativeTrades[i - 1];
 
     while (purchasesCopy[0]?.day === i) {
       let purchaseToAdd = purchasesCopy.shift();
@@ -790,7 +790,7 @@ function main() {
       ethReceived += saleToAdd.ethReceived;
     }
 
-    cumsum.push({
+    cumulativeTrades.push({
       day: i,
       ethSpent,
       revnetTokensReceived,
@@ -799,8 +799,6 @@ function main() {
     });
   }
 
-  console.log(cumsum);
-
   let cumulativeVolumesPlot = Plot.plot({
     title: "Cumulative Volumes (Revnet and Pool)",
     style: chartStyles,
@@ -808,11 +806,12 @@ function main() {
     y: { label: "Amount", grid: true },
     marks: [
       Plot.text(
-        cumsum,
+        cumulativeTrades,
         Plot.pointerX({
           px: "day",
           dy: -18,
-          frameAnchor: "top-right",
+          dx: 45,
+          frameAnchor: "top-left",
           text: (d) =>
             [
               `Day: ${d.day}`,
@@ -820,24 +819,24 @@ function main() {
               `Tokens Received: ${d.revnetTokensReceived.toFixed(2)}`,
               `Tokens Spent: ${d.revnetTokensSpent.toFixed(2)}`,
               `ETH Recieved: ${d.ethReceived.toFixed(2)} Ξ`,
-            ].join("    "),
+            ].join("   "),
         })
       ),
       Plot.ruleY([0]),
       Plot.ruleX(
-        cumsum,
+        cumulativeTrades,
         Plot.pointerX({
           x: "day",
           stroke: solar.base01,
         })
       ),
-      Plot.line(cumsum, {
+      Plot.line(cumulativeTrades, {
         x: "day",
         y: "ethSpent",
         stroke: solar.blue,
       }),
       Plot.text(
-        cumsum,
+        cumulativeTrades,
         Plot.selectLast({
           x: "day",
           y: "ethSpent",
@@ -847,13 +846,13 @@ function main() {
           fill: solar.blue,
         })
       ),
-      Plot.line(cumsum, {
+      Plot.line(cumulativeTrades, {
         x: "day",
         y: "revnetTokensReceived",
         stroke: solar.red,
       }),
       Plot.text(
-        cumsum,
+        cumulativeTrades,
         Plot.selectLast({
           x: "day",
           y: "revnetTokensReceived",
@@ -863,13 +862,13 @@ function main() {
           fill: solar.red,
         })
       ),
-      Plot.line(cumsum, {
+      Plot.line(cumulativeTrades, {
         x: "day",
         y: "revnetTokensSpent",
         stroke: solar.green,
       }),
       Plot.text(
-        cumsum,
+        cumulativeTrades,
         Plot.selectLast({
           x: "day",
           y: "revnetTokensSpent",
@@ -879,13 +878,13 @@ function main() {
           fill: solar.green,
         })
       ),
-      Plot.line(cumsum, {
+      Plot.line(cumulativeTrades, {
         x: "day",
         y: "ethReceived",
         stroke: solar.cyan,
       }),
       Plot.text(
-        cumsum,
+        cumulativeTrades,
         Plot.selectLast({
           x: "day",
           y: "ethReceived",
@@ -898,11 +897,48 @@ function main() {
     ],
   });
 
+  const profitabilityData = traders
+    .filter((t) => t.sale)
+    .map((t) => ({
+      saleDay: t.sale.day,
+      saleSource: t.sale.source,
+      purchaseDay: t.purchase.day,
+      purchaseSource: t.purchase.source,
+      daysHeld: t.sale.day - t.purchase.day,
+      profit: t.sale.ethReceived - t.purchase.ethSpent,
+      tokensPurchased: t.purchase.revnetTokensReceived,
+    }));
+
+  const profitabilityPlot = Plot.plot({
+    title: "Profitability",
+    style: chartStyles,
+    grid: true,
+    color: {
+      scheme: "Warm",
+      legend: true,
+      label: "Day Purchased",
+      style: { background: "none" },
+    },
+    r: { label: "Tokens Purchased" },
+    x: { label: "Days Held" },
+    y: { label: "Profit (ETH)" },
+    marks: [
+      Plot.dot(profitabilityData, {
+        x: "daysHeld",
+        y: "profit",
+        r: "tokensPurchased",
+        fill: "purchaseDay",
+        tip: true,
+      }),
+    ],
+  });
+
   dashboard.appendChild(tokenPricePlot);
   dashboard.appendChild(revnetPlot);
   dashboard.appendChild(liquidityPoolPlot);
   dashboard.appendChild(boostPlot);
   dashboard.appendChild(cumulativeVolumesPlot);
+  dashboard.appendChild(profitabilityPlot);
   console.timeEnd("main");
 }
 
