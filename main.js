@@ -236,16 +236,20 @@ class Trader {
  * @param {number} ethSpent - The amount of ETH spent to purchase tokens.
  * @param {object} r - The Revnet object.
  * @param {object} p - The LiquidityPool object.
- * @param {object} t - The Trader object.
  * @returns {number} - The number of tokens purchased.
  */
-function purchaseRevnetTokens(ethSpent, r, p, t) {
+function purchaseRevnetTokens(ethSpent, r, p) {
   let source, revnetTokensReceived;
   if (
     p.revnetToken > p.getRevnetTokenReturn(ethSpent) &&
     p.getRevnetTokenReturn(ethSpent) > r.getTokensCreatedPerEth() * ethSpent
   ) {
     revnetTokensReceived = p.buyRevnetTokens(ethSpent);
+    if(r.day < r.boostDurationInDays) {
+      const tokensToSend = revnetTokensReceived * r.boostPercent
+      r.tokensSentToBoost += tokensToSend
+      revnetTokensReceived -= tokensToSend
+    }
     source = "pool";
   } else {
     revnetTokensReceived = r.createTokensAtCeiling(ethSpent);
@@ -259,10 +263,9 @@ function purchaseRevnetTokens(ethSpent, r, p, t) {
  * @param {number} revnetTokensSpent - The amount of Revnet tokens spent to sell.
  * @param {object} r - The Revnet object.
  * @param {object} p - The LiquidityPool object.
- * @param {object} t - The Trader object.
  * @returns {number} - The amount of ETH received from selling tokens.
  */
-function sellRevnetTokens(revnetTokensSpent, r, p, t) {
+function sellRevnetTokens(revnetTokensSpent, r, p) {
   let source,
     ethReceived = 0;
   if (
@@ -277,9 +280,6 @@ function sellRevnetTokens(revnetTokensSpent, r, p, t) {
   }
 
   return { ethReceived, source };
-
-  if (source) t.recordSale(revnetTokensSpent, ethReceived, source, r.day);
-  return ethReceived;
 }
 
 function poissonRandomNumber(lambda) {
@@ -402,7 +402,6 @@ function simulate() {
         ethSpent,
         r,
         p,
-        t
       );
       t.recordPurchase(ethSpent, revnetTokensReceived, source, r.day);
       p.provideRevnetTokens(revnetTokenLiquidityRatio * revnetTokensReceived);
@@ -421,7 +420,6 @@ function simulate() {
           revnetTokensSpent,
           r,
           p,
-          t
         );
         t.recordSale(revnetTokensSpent, ethReceived, source, r.day);
         p.provideEth(ethLiquidityRatio * ethReceived);
@@ -454,7 +452,6 @@ function simulate() {
 /*
  * TODO:
  * Make LP more realistic. Make traders "intelligent".
- * Plot traders and trades
  * Descriptions for parameters
  * Double check price floor logic
  */
@@ -507,7 +504,6 @@ function main() {
         simulationData,
         Plot.pointerX({
           x: "day",
-          py: "poolRevnetTokenPrice",
           stroke: solar.base01,
         })
       ),
@@ -726,7 +722,6 @@ function main() {
         simulationData,
         Plot.pointerX({
           px: "day",
-          py: "tokensSentToBoost",
           dy: -18,
           frameAnchor: "top-right",
           text: (d) =>
@@ -905,9 +900,9 @@ function main() {
     style: chartStyles,
     grid: true,
     x: { label: "Day" },
-    y: { label: "Purchase Amount (ETH)" },
+    y: { label: "ETH Spent" },
     symbol: { label: "Source", legend: true, style: { background: "none", fontSize: "18px"} },
-    color: { range: [solar.cyan, solar.magenta] },
+    color: { label: "Source", range: [solar.cyan, solar.magenta] },
     marks: [
       Plot.ruleY([0]),
       Plot.dot(purchaseData, {
@@ -927,6 +922,7 @@ function main() {
       saleSource: t.sale.source,
       purchaseDay: t.purchase.day,
       purchaseSource: t.purchase.source,
+      ethReceived: t.sale.ethReceived,
       daysHeld: t.sale.day - t.purchase.day,
       profit: t.sale.ethReceived - t.purchase.ethSpent,
       tokensPurchased: t.purchase.revnetTokensReceived,
@@ -937,14 +933,14 @@ function main() {
     style: chartStyles,
     grid: true,
     x: {label: "Day"},
-    y: {label: "Tokens Sold"},
+    y: {label: "ETH Received"},
     symbol: { label: "Source", legend: true, style: { background: "none", fontSize: "18px"} },
-    color: { range: [solar.cyan, solar.magenta]},
+    color: { label: "Source", range: [solar.cyan, solar.magenta]},
     marks: [
       Plot.ruleY([0]),
       Plot.dot(saleData, {
         x: "saleDay",
-        y: "tokensPurchased",
+        y: "ethReceived",
         symbol: "saleSource",
         stroke: "saleSource",
         tip: true,
