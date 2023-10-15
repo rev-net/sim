@@ -896,8 +896,31 @@ function main() {
       ),
     ],
   });
+  
+  const purchaseData = traders.filter(t => t.purchase).map(t => t.purchase)
 
-  const profitabilityData = traders
+  
+  const purchasePlot = Plot.plot({
+    title: "Purchases",
+    style: chartStyles,
+    grid: true,
+    x: { label: "Day" },
+    y: { label: "Purchase Amount (ETH)" },
+    symbol: { label: "Source", legend: true, style: { background: "none", fontSize: "18px"} },
+    color: { range: [solar.cyan, solar.magenta] },
+    marks: [
+      Plot.ruleY([0]),
+      Plot.dot(purchaseData, {
+        x: "day",
+        y: "ethSpent",
+        symbol: "source",
+        stroke: "source",
+        tip: true,
+      })
+    ]
+  })
+
+  const saleData = traders
     .filter((t) => t.sale)
     .map((t) => ({
       saleDay: t.sale.day,
@@ -908,6 +931,26 @@ function main() {
       profit: t.sale.ethReceived - t.purchase.ethSpent,
       tokensPurchased: t.purchase.revnetTokensReceived,
     }));
+
+  const salePlot = Plot.plot({
+    title: "Sales",
+    style: chartStyles,
+    grid: true,
+    x: {label: "Day"},
+    y: {label: "Tokens Sold"},
+    symbol: { label: "Source", legend: true, style: { background: "none", fontSize: "18px"} },
+    color: { range: [solar.cyan, solar.magenta]},
+    marks: [
+      Plot.ruleY([0]),
+      Plot.dot(saleData, {
+        x: "saleDay",
+        y: "tokensPurchased",
+        symbol: "saleSource",
+        stroke: "saleSource",
+        tip: true,
+      })
+    ]
+  })
 
   const profitabilityPlot = Plot.plot({
     title: "Profitability",
@@ -923,7 +966,7 @@ function main() {
     x: { label: "Days Held" },
     y: { label: "Profit (ETH)" },
     marks: [
-      Plot.dot(profitabilityData, {
+      Plot.dot(saleData, {
         x: "daysHeld",
         y: "profit",
         r: "tokensPurchased",
@@ -939,6 +982,8 @@ function main() {
   dashboard.appendChild(boostPlot);
   dashboard.appendChild(cumulativeVolumesPlot);
   dashboard.appendChild(profitabilityPlot);
+  dashboard.appendChild(purchasePlot)
+  dashboard.appendChild(salePlot)
   console.timeEnd("main");
 }
 
