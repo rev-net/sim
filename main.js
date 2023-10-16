@@ -46,8 +46,8 @@ class LiquidityPool {
    */
   getEthReturn(revnetTokenAmount) {
     const invariant = this.eth * this.revnetToken;
-    let newRevnetTokenBalance = this.revnetToken + revnetTokenAmount;
-    let newEthBalance = invariant / newRevnetTokenBalance;
+    const newRevnetTokenBalance = this.revnetToken + revnetTokenAmount;
+    const newEthBalance = invariant / newRevnetTokenBalance;
     return this.eth - newEthBalance;
   }
 
@@ -58,8 +58,8 @@ class LiquidityPool {
    */
   getRevnetTokenReturn(ethAmount) {
     const invariant = this.eth * this.revnetToken;
-    let newEthBalance = this.eth + ethAmount;
-    let newRevnetTokenBalance = invariant / newEthBalance;
+    const newEthBalance = this.eth + ethAmount;
+    const newRevnetTokenBalance = invariant / newEthBalance;
     return this.revnetToken - newRevnetTokenBalance;
   }
 
@@ -70,9 +70,9 @@ class LiquidityPool {
    */
   buyEth(revnetTokenAmount) {
     const invariant = this.eth * this.revnetToken;
-    let newRevnetTokenBalance = this.revnetToken + revnetTokenAmount;
-    let newEthBalance = invariant / newRevnetTokenBalance;
-    let ethAmount = this.eth - newEthBalance;
+    const newRevnetTokenBalance = this.revnetToken + revnetTokenAmount;
+    const newEthBalance = invariant / newRevnetTokenBalance;
+    const ethAmount = this.eth - newEthBalance;
     this.revnetToken = newRevnetTokenBalance;
     this.eth = newEthBalance;
     return ethAmount;
@@ -84,9 +84,9 @@ class LiquidityPool {
    */
   buyRevnetTokens(ethAmount) {
     const invariant = this.eth * this.revnetToken;
-    let newEthBalance = this.eth + ethAmount;
-    let newRevnetTokenBalance = invariant / newEthBalance;
-    let revnetTokenAmount = this.revnetToken - newRevnetTokenBalance;
+    const newEthBalance = this.eth + ethAmount;
+    const newRevnetTokenBalance = invariant / newEthBalance;
+    const revnetTokenAmount = this.revnetToken - newRevnetTokenBalance;
     this.eth = newEthBalance;
     this.revnetToken = newRevnetTokenBalance;
     return revnetTokenAmount;
@@ -155,7 +155,7 @@ class Revnet {
    * @return {number} The number of tokens returned to the payer.
    */
   createTokensAtCeiling(ethAmount) {
-    let tokenAmount = ethAmount * this.getTokensCreatedPerEth();
+    const tokenAmount = ethAmount * this.getTokensCreatedPerEth();
     this.ethBalance += ethAmount;
     this.tokenSupply += tokenAmount;
     if (this.day < this.boostDurationInDays) {
@@ -172,7 +172,7 @@ class Revnet {
    * @return {number} The amount of ETH reclaimed.
    */
   destroyTokensAtFloor(tokenAmount) {
-    let ethAmount = this.getEthReclaimAmount(tokenAmount);
+    const ethAmount = this.getEthReclaimAmount(tokenAmount);
     this.tokenSupply -= tokenAmount;
     this.ethBalance -= ethAmount;
     return ethAmount;
@@ -308,11 +308,7 @@ function poissonRandomNumber(lambda, rand) {
 }
 
 function normalRandomNumber(rand) {
-  let u = 0,
-    v = 0;
-  u = rand();
-  v = rand();
-  return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  return Math.sqrt(-2.0 * Math.log(rand())) * Math.cos(2.0 * Math.PI * rand());
 }
 
 function logNormRandomNumber(mu = 0, sigma = 1.5, rand) {
@@ -320,45 +316,47 @@ function logNormRandomNumber(mu = 0, sigma = 1.5, rand) {
 }
 
 function simulate() {
-  let priceCeilingIncreaseFrequencyInDays = Number(
+  const priceCeilingIncreaseFrequencyInDays = Number(
     document.getElementById("priceCeilingIncreaseFrequencyInDays").value
   );
-  let priceCeilingIncreasePercentage = Number(
+  const priceCeilingIncreasePercentage = Number(
     document.getElementById("priceCeilingIncreasePercentage").value
   );
-  let priceFloorTaxIntensity = Number(
+  const priceFloorTaxIntensity = Number(
     document.getElementById("priceFloorTaxIntensity").value
   );
-  let boostPercent = Number(document.getElementById("boostPercent").value);
-  let boostDurationInDays = Number(
+  const boostPercent = Number(document.getElementById("boostPercent").value);
+  const boostDurationInDays = Number(
     document.getElementById("boostDurationInDays").value
   );
-  let premintAmount = Number(document.getElementById("premintAmount").value);
-  let eth = Number(document.getElementById("eth").value);
-  let revnetToken = Number(document.getElementById("revnetToken").value);
-  let daysToCalculate = Number(
+  const premintAmount = Number(document.getElementById("premintAmount").value);
+  const eth = Number(document.getElementById("eth").value);
+  const revnetToken = Number(document.getElementById("revnetToken").value);
+  const daysToCalculate = Number(
     document.getElementById("daysToCalculate").value
   );
-  let randomnessSeed = Number(document.getElementById("randomnessSeed").value);
-  let dailyPurchasesLambda = Number(
+  const randomnessSeed = Number(
+    document.getElementById("randomnessSeed").value
+  );
+  const dailyPurchasesLambda = Number(
     document.getElementById("dailyPurchasesLambda").value
   );
-  let purchaseAmountMean = Number(
+  const purchaseAmountMean = Number(
     document.getElementById("purchaseAmountMean").value
   );
-  let purchaseAmountDeviation = Number(
+  const purchaseAmountDeviation = Number(
     document.getElementById("purchaseAmountDeviation").value
   );
-  let revnetTokenLiquidityRatio = Number(
+  const revnetTokenLiquidityRatio = Number(
     document.getElementById("revnetTokenLiquidityRatio").value
   );
-  let ethLiquidityRatio = Number(
+  const ethLiquidityRatio = Number(
     document.getElementById("ethLiquidityRatio").value
   );
-  let saleProbability = Number(
+  const saleProbability = Number(
     document.getElementById("saleProbability").value
   );
-  let minimumDaysHeld = Number(
+  const minimumDaysHeld = Number(
     document.getElementById("minimumDaysHeld").value
   );
 
@@ -378,15 +376,15 @@ function simulate() {
 
   for (; r.day < daysToCalculate; r.incrementDay()) {
     // Make purchases
-    let dailyPurchases = [];
+    const dailyPurchases = [];
     for (let i = 0; i < poissonRandomNumber(dailyPurchasesLambda, rand); i++) {
-      let t = new Trader();
-      let ethSpent = logNormRandomNumber(
+      const t = new Trader();
+      const ethSpent = logNormRandomNumber(
         purchaseAmountMean,
         purchaseAmountDeviation,
         rand
       );
-      let { revnetTokensReceived, source } = purchaseRevnetTokens(
+      const { revnetTokensReceived, source } = purchaseRevnetTokens(
         ethSpent,
         r,
         p
@@ -398,14 +396,14 @@ function simulate() {
     }
 
     // Make sales
-    let dailySales = [];
+    const dailySales = [];
     traders.forEach((t) => {
       if (t.sale) return;
       if (r.day < t.purchase.day + minimumDaysHeld) return;
       if (rand() < saleProbability) {
-        let revnetTokensSpent =
+        const revnetTokensSpent =
           t.purchase.revnetTokensReceived * (1 - revnetTokenLiquidityRatio);
-        let { ethReceived, source } = sellRevnetTokens(revnetTokensSpent, r, p);
+        const { ethReceived, source } = sellRevnetTokens(revnetTokensSpent, r, p);
         t.recordSale(revnetTokensSpent, ethReceived, source, r.day);
         p.provideEth(ethLiquidityRatio * ethReceived);
         dailySales.push({ revnetTokensSpent, ethReceived, source });
@@ -473,10 +471,10 @@ function main() {
 
   console.time("simulate");
 
-  let [simulationData, traders] = simulate();
+  const [simulationData, traders] = simulate();
   console.timeEnd("simulate");
 
-  let tokenPricePlot = Plot.plot({
+  const tokenPricePlot = Plot.plot({
     title: "Revnet Token Price",
     style: chartStyles,
     marginLeft: 0,
@@ -570,7 +568,7 @@ function main() {
     ],
   });
 
-  let revnetPlot = Plot.plot({
+  const revnetPlot = Plot.plot({
     title: "Revnet Balances",
     style: chartStyles,
     x: { label: "Day" },
@@ -633,7 +631,7 @@ function main() {
     ],
   });
 
-  let liquidityPoolPlot = Plot.plot({
+  const liquidityPoolPlot = Plot.plot({
     title: "Liquidity Pool Balances",
     style: chartStyles,
     x: { label: "Day" },
@@ -696,7 +694,7 @@ function main() {
     ],
   });
 
-  let boostPlot = Plot.plot({
+  const boostPlot = Plot.plot({
     title: "Cumulative Tokens Sent to Boost",
     style: chartStyles,
     x: { label: "Day" },
@@ -743,9 +741,9 @@ function main() {
     })
   );
 
-  let cumulativeTrades = [];
-  let purchasesCopy = purchases.slice();
-  let salesCopy = sales.slice();
+  const cumulativeTrades = [];
+  const purchasesCopy = purchases.slice();
+  const salesCopy = sales.slice();
   for (let i = 0; i < simulationData.length; i++) {
     let { ethSpent, revnetTokensReceived, revnetTokensSpent, ethReceived } =
       i === 0
@@ -758,13 +756,13 @@ function main() {
         : cumulativeTrades[i - 1];
 
     while (purchasesCopy[0]?.day === i) {
-      let purchaseToAdd = purchasesCopy.shift();
+      const purchaseToAdd = purchasesCopy.shift();
       ethSpent += purchaseToAdd.ethSpent;
       revnetTokensReceived += purchaseToAdd.revnetTokensReceived;
     }
 
     while (salesCopy[0]?.day === i) {
-      let saleToAdd = salesCopy.shift();
+      const saleToAdd = salesCopy.shift();
       revnetTokensSpent += saleToAdd.revnetTokensSpent;
       ethReceived += saleToAdd.ethReceived;
     }
@@ -778,7 +776,7 @@ function main() {
     });
   }
 
-  let cumulativeVolumesPlot = Plot.plot({
+  const cumulativeVolumesPlot = Plot.plot({
     title: "Cumulative Volumes (Revnet and Pool)",
     style: chartStyles,
     x: { label: "Day" },
