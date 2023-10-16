@@ -245,10 +245,10 @@ function purchaseRevnetTokens(ethSpent, r, p) {
     p.getRevnetTokenReturn(ethSpent) > r.getTokensCreatedPerEth() * ethSpent
   ) {
     revnetTokensReceived = p.buyRevnetTokens(ethSpent);
-    if(r.day < r.boostDurationInDays) {
-      const tokensToSend = revnetTokensReceived * r.boostPercent
-      r.tokensSentToBoost += tokensToSend
-      revnetTokensReceived -= tokensToSend
+    if (r.day < r.boostDurationInDays) {
+      const tokensToSend = revnetTokensReceived * r.boostPercent;
+      r.tokensSentToBoost += tokensToSend;
+      revnetTokensReceived -= tokensToSend;
     }
     source = "pool";
   } else {
@@ -282,62 +282,44 @@ function sellRevnetTokens(revnetTokensSpent, r, p) {
   return { ethReceived, source };
 }
 
-function poissonRandomNumber(lambda) {
+function newLCG(seed) {
+  const a = 1664525;
+  const c = 1013904223;
+  const m = 2 ** 32;
+  let currentSeed = seed;
+
+  return function () {
+    currentSeed = (a * currentSeed + c) % m;
+    return currentSeed / m;
+  };
+}
+
+function poissonRandomNumber(lambda, rand) {
   let L = Math.exp(-lambda);
   let k = 0;
   let p = 1;
 
   do {
     k++;
-    p *= Math.random();
+    p *= rand();
   } while (p > L);
 
   return k - 1;
 }
 
-function normalRandomNumber() {
+function normalRandomNumber(rand) {
   let u = 0,
     v = 0;
-  while (u === 0) u = Math.random();
-  while (v === 0) v = Math.random();
+  u = rand();
+  v = rand();
   return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
 }
 
-function logNormRandomNumber(mu = 0, sigma = 1.5) {
-  return Math.exp(mu + sigma * normalRandomNumber());
+function logNormRandomNumber(mu = 0, sigma = 1.5, rand) {
+  return Math.exp(mu + sigma * normalRandomNumber(rand));
 }
-
-function randomTrial() {
-  let results = [];
-  for (let i = 0; i < 100; i++) {
-    results.push({
-      index: i,
-      poisson: poissonRandomNumber(i),
-      normalRandomNumber: normalRandomNumber(),
-      logvar1_1: logNormRandomNumber(1, 1),
-      logvar0_1: logNormRandomNumber(0, 1),
-      logvar0_15: logNormRandomNumber(0, 1.5),
-    });
-  }
-
-  console.table(results);
-}
-// randomTrial();
-
-// Simulation metaparameters
-/*
-const daysToCalculate = 100; // The number of days to simulate for (10 - 100)
-const dailyTradesLambda = 5; // The lambda used in a poisson distribution for the number of daily trades
-
-const purchaseAmountMean = 0; // The lognorm mean for the amount in a trade
-const purchaseAmountVariance = 1.5; // The lognorm variance for the amount in a trade
-
-const revnetTokenLiquidityRatio = 0.1; // The percentage of tokens made available on secondary markets once they are purchased.
-const ethLiquidityRatio = 0.1; // The percentage of eth made available on secondary markets once it is purchased
-*/
 
 function simulate() {
-  // Get values from inputs
   let priceCeilingIncreaseFrequencyInDays = Number(
     document.getElementById("priceCeilingIncreaseFrequencyInDays").value
   );
@@ -357,14 +339,15 @@ function simulate() {
   let daysToCalculate = Number(
     document.getElementById("daysToCalculate").value
   );
+  let randomnessSeed = Number(document.getElementById("randomnessSeed").value);
   let dailyPurchasesLambda = Number(
     document.getElementById("dailyPurchasesLambda").value
   );
   let purchaseAmountMean = Number(
     document.getElementById("purchaseAmountMean").value
   );
-  let purchaseAmountVariance = Number(
-    document.getElementById("purchaseAmountVariance").value
+  let purchaseAmountDeviation = Number(
+    document.getElementById("purchaseAmountDeviation").value
   );
   let revnetTokenLiquidityRatio = Number(
     document.getElementById("revnetTokenLiquidityRatio").value
@@ -375,7 +358,11 @@ function simulate() {
   let saleProbability = Number(
     document.getElementById("saleProbability").value
   );
+  let minimumDaysHeld = Number(
+    document.getElementById("minimumDaysHeld").value
+  );
 
+  const rand = newLCG(randomnessSeed);
   const r = new Revnet(
     priceCeilingIncreasePercentage,
     priceCeilingIncreaseFrequencyInDays,
@@ -392,16 +379,17 @@ function simulate() {
   for (; r.day < daysToCalculate; r.incrementDay()) {
     // Make purchases
     let dailyPurchases = [];
-    for (let i = 0; i < poissonRandomNumber(dailyPurchasesLambda); i++) {
+    for (let i = 0; i < poissonRandomNumber(dailyPurchasesLambda, rand); i++) {
       let t = new Trader();
       let ethSpent = logNormRandomNumber(
         purchaseAmountMean,
-        purchaseAmountVariance
+        purchaseAmountDeviation,
+        rand
       );
       let { revnetTokensReceived, source } = purchaseRevnetTokens(
         ethSpent,
         r,
-        p,
+        p
       );
       t.recordPurchase(ethSpent, revnetTokensReceived, source, r.day);
       p.provideRevnetTokens(revnetTokenLiquidityRatio * revnetTokensReceived);
@@ -413,14 +401,11 @@ function simulate() {
     let dailySales = [];
     traders.forEach((t) => {
       if (t.sale) return;
-      if (Math.random() < saleProbability) {
+      if (r.day < t.purchase.day + minimumDaysHeld) return;
+      if (rand() < saleProbability) {
         let revnetTokensSpent =
           t.purchase.revnetTokensReceived * (1 - revnetTokenLiquidityRatio);
-        let { ethReceived, source } = sellRevnetTokens(
-          revnetTokensSpent,
-          r,
-          p,
-        );
+        let { ethReceived, source } = sellRevnetTokens(revnetTokensSpent, r, p);
         t.recordSale(revnetTokensSpent, ethReceived, source, r.day);
         p.provideEth(ethLiquidityRatio * ethReceived);
         dailySales.push({ revnetTokensSpent, ethReceived, source });
@@ -453,7 +438,6 @@ function simulate() {
  * TODO:
  * Make LP more realistic. Make traders "intelligent".
  * Descriptions for parameters
- * Double check price floor logic
  */
 
 const solar = {
@@ -891,17 +875,20 @@ function main() {
       ),
     ],
   });
-  
-  const purchaseData = traders.filter(t => t.purchase).map(t => t.purchase)
 
-  
+  const purchaseData = traders.filter((t) => t.purchase).map((t) => t.purchase);
+
   const purchasePlot = Plot.plot({
     title: "Purchases",
     style: chartStyles,
     grid: true,
     x: { label: "Day" },
     y: { label: "ETH Spent" },
-    symbol: { label: "Source", legend: true, style: { background: "none", fontSize: "18px"} },
+    symbol: {
+      label: "Source",
+      legend: true,
+      style: { background: "none", fontSize: "18px" },
+    },
     color: { label: "Source", range: [solar.cyan, solar.magenta] },
     marks: [
       Plot.ruleY([0]),
@@ -911,9 +898,9 @@ function main() {
         symbol: "source",
         stroke: "source",
         tip: true,
-      })
-    ]
-  })
+      }),
+    ],
+  });
 
   const saleData = traders
     .filter((t) => t.sale)
@@ -932,10 +919,14 @@ function main() {
     title: "Sales",
     style: chartStyles,
     grid: true,
-    x: {label: "Day"},
-    y: {label: "ETH Received"},
-    symbol: { label: "Source", legend: true, style: { background: "none", fontSize: "18px"} },
-    color: { label: "Source", range: [solar.cyan, solar.magenta]},
+    x: { label: "Day" },
+    y: { label: "ETH Received" },
+    symbol: {
+      label: "Source",
+      legend: true,
+      style: { background: "none", fontSize: "18px" },
+    },
+    color: { label: "Source", range: [solar.cyan, solar.magenta] },
     marks: [
       Plot.ruleY([0]),
       Plot.dot(saleData, {
@@ -944,9 +935,9 @@ function main() {
         symbol: "saleSource",
         stroke: "saleSource",
         tip: true,
-      })
-    ]
-  })
+      }),
+    ],
+  });
 
   const profitabilityPlot = Plot.plot({
     title: "Profitability",
@@ -978,21 +969,13 @@ function main() {
   dashboard.appendChild(boostPlot);
   dashboard.appendChild(cumulativeVolumesPlot);
   dashboard.appendChild(profitabilityPlot);
-  dashboard.appendChild(purchasePlot)
-  dashboard.appendChild(salePlot)
+  dashboard.appendChild(purchasePlot);
+  dashboard.appendChild(salePlot);
   console.timeEnd("main");
 }
 
 main();
 
-document.getElementById("simulate").addEventListener("click", main);
-
-// Automatically update simulation on input
-let timeoutId;
-const inputs = document.querySelectorAll("input");
-inputs.forEach((input) => {
-  input.addEventListener("input", () => {
-    if (timeoutId) clearTimeout(timeoutId);
-    timeoutId = setTimeout(main, 100);
-  });
-});
+document
+  .querySelectorAll("input")
+  .forEach((i) => i.addEventListener("input", main));

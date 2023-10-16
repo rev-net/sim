@@ -108,18 +108,21 @@
           <span class="current-value">10%</span>
           <span class="max-value">100%</span>
         </div>
-        <button id="simulate">Simulate</button>
       </section>
       <section>
         <h2>Simulation Metaparameters</h2>
         <label for="daysToCalculate">Days To Calculate</label>
         <input type="number" id="daysToCalculate" value="100" />
+        <label for="randomnessSeed">Randomness Seed</label>
+        <input type="number" id="randomnessSeed" value="1" />
         <label for="dailyPurchasesLambda">Daily Purchases Lambda</label>
         <input type="number" id="dailyPurchasesLambda" value="5" />
         <label for="purchaseAmountMean">Purchase Amount Mean</label>
         <input type="number" id="purchaseAmountMean" value="0" />
-        <label for="purchaseAmountVariance">Purchase Amount Variance</label>
-        <input type="number" id="purchaseAmountVariance" value="1.5" />
+        <label for="purchaseAmountDeviation">Purchase Amount Deviation</label>
+        <input type="number" id="purchaseAmountDeviation" value="1.5" />
+        <label for="minimumDaysHeld">Minimum Days Held</label>
+        <input type="number" id="minimumDaysHeld" value="10" />
         <label for="saleProbability">Sale Probability</label>
         <input
           type="range"
@@ -144,13 +147,6 @@
           slider.nextElementSibling.querySelector(".current-value");
         currentValueSpan.textContent = `${Math.floor(slider.value * 100)}%`;
       }
-
-      document
-        .querySelector("#simulate")
-        .addEventListener("click", function () {
-          this.classList.add("dance");
-          setTimeout(() => this.classList.remove("dance"), 500);
-        });
     </script>
     <script type="module" src="/main.js"></script>
   </body>
