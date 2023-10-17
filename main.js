@@ -311,8 +311,8 @@ function normalRandomNumber(rand) {
   return Math.sqrt(-2.0 * Math.log(rand())) * Math.cos(2.0 * Math.PI * rand());
 }
 
-function logNormRandomNumber(mu = 0, sigma = 1.5, rand) {
-  return Math.exp(mu + sigma * normalRandomNumber(rand));
+function logNormRandomNumber(mu, sigma, rand) {
+  return Math.exp(sigma * normalRandomNumber(rand) + mu);
 }
 
 function simulate() {
@@ -360,7 +360,10 @@ function simulate() {
     document.getElementById("minimumDaysHeld").value
   );
 
-  const rand = newLCG(randomnessSeed);
+  const poissonRand = newLCG(randomnessSeed + 2)
+  const buyRand = newLCG(randomnessSeed);
+  const sellRand = newLCG(randomnessSeed + 1)
+
   const r = new Revnet(
     priceCeilingIncreasePercentage,
     priceCeilingIncreaseFrequencyInDays,
@@ -377,12 +380,12 @@ function simulate() {
   for (; r.day < daysToCalculate; r.incrementDay()) {
     // Make purchases
     const dailyPurchases = [];
-    for (let i = 0; i < poissonRandomNumber(dailyPurchasesLambda, rand); i++) {
+    for (let i = 0; i < poissonRandomNumber(dailyPurchasesLambda, poissonRand); i++) {
       const t = new Trader();
       const ethSpent = logNormRandomNumber(
         purchaseAmountMean,
         purchaseAmountDeviation,
-        rand
+        buyRand
       );
       const { revnetTokensReceived, source } = purchaseRevnetTokens(
         ethSpent,
@@ -400,7 +403,7 @@ function simulate() {
     traders.forEach((t) => {
       if (t.sale) return;
       if (r.day < t.purchase.day + minimumDaysHeld) return;
-      if (rand() < saleProbability) {
+      if (sellRand() < saleProbability) {
         const revnetTokensSpent =
           t.purchase.revnetTokensReceived * (1 - revnetTokenLiquidityRatio);
         const { ethReceived, source } = sellRevnetTokens(revnetTokensSpent, r, p);

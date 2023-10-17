@@ -17,6 +17,8 @@
           type="number"
           id="priceCeilingIncreaseFrequencyInDays"
           value="1"
+          step="1"
+          min="0"
         />
         <label for="priceCeilingIncreasePercentage"
           >Price Ceiling Increase Percentage</label
@@ -25,14 +27,14 @@
           type="range"
           id="priceCeilingIncreasePercentage"
           value="0.02"
-          step="0.01"
+          step="0.002"
           min="0"
           max="1"
           oninput="updateSliderPercent(this)"
         />
         <div class="slider-values">
           <span class="min-value">0%</span>
-          <span class="current-value">2%</span>
+          <span class="current-value">2.0%</span>
           <span class="max-value">100%</span>
         </div>
         <label for="priceFloorTaxIntensity">Price Floor Tax Intensity</label>
@@ -40,14 +42,14 @@
           type="range"
           id="priceFloorTaxIntensity"
           value="0.33"
-          step="0.01"
+          step="0.005"
           min="0"
           max="1"
           oninput="updateSliderPercent(this)"
         />
         <div class="slider-values">
           <span class="min-value">0%</span>
-          <span class="current-value">33%</span>
+          <span class="current-value">33.0%</span>
           <span class="max-value">100%</span>
         </div>
         <label for="boostPercent">Boost Percent</label>
@@ -55,27 +57,27 @@
           type="range"
           id="boostPercent"
           value="0.1"
-          step="0.01"
+          step="0.005"
           min="0"
           max="1"
           oninput="updateSliderPercent(this)"
         />
         <div class="slider-values">
           <span class="min-value">0%</span>
-          <span class="current-value">10%</span>
+          <span class="current-value">10.0%</span>
           <span class="max-value">100%</span>
         </div>
         <label for="boostDurationInDays">Boost Duration In Days</label>
-        <input type="number" id="boostDurationInDays" value="30" />
+        <input type="number" id="boostDurationInDays" value="30" min="0" step="1" />
         <label for="premintAmount">Premint Amount</label>
-        <input type="number" id="premintAmount" value="5" />
+        <input type="number" id="premintAmount" value="5" min="0" />
       </section>
       <section>
         <h2>Liquidity Pool Parameters</h2>
         <label for="eth">Initial ETH</label>
-        <input type="number" id="eth" value="0" />
+        <input type="number" id="eth" value="0" min="0"/>
         <label for="revnetToken">Initial Revnet Token</label>
-        <input type="number" id="revnetToken" value="0" />
+        <input type="number" id="revnetToken" value="0" min="0" />
         <label for="revnetTokenLiquidityRatio"
           >Revnet Token Liquidity Ratio</label
         >
@@ -83,14 +85,14 @@
           type="range"
           id="revnetTokenLiquidityRatio"
           value="0.1"
-          step="0.01"
+          step="0.005"
           min="0"
           max="1"
           oninput="updateSliderPercent(this)"
         />
         <div class="slider-values">
           <span class="min-value">0%</span>
-          <span class="current-value">10%</span>
+          <span class="current-value">10.0%</span>
           <span class="max-value">100%</span>
         </div>
         <label for="ethLiquidityRatio">ETH Liquidity Ratio</label>
@@ -98,31 +100,31 @@
           type="range"
           id="ethLiquidityRatio"
           value="0.1"
-          step="0.01"
+          step="0.005"
           min="0"
           max="1"
           oninput="updateSliderPercent(this)"
         />
         <div class="slider-values">
           <span class="min-value">0%</span>
-          <span class="current-value">10%</span>
+          <span class="current-value">10.0%</span>
           <span class="max-value">100%</span>
         </div>
       </section>
       <section>
         <h2>Simulation Metaparameters</h2>
         <label for="daysToCalculate">Days To Calculate</label>
-        <input type="number" id="daysToCalculate" value="100" />
+        <input type="number" id="daysToCalculate" value="100" min="0" step="1" />
         <label for="randomnessSeed">Randomness Seed</label>
-        <input type="number" id="randomnessSeed" value="1" />
+        <input type="number" id="randomnessSeed" value="1" min="1" />
         <label for="dailyPurchasesLambda">Daily Purchases Lambda</label>
-        <input type="number" id="dailyPurchasesLambda" value="5" />
+        <input type="number" id="dailyPurchasesLambda" value="5" min="0" step="1"/>
         <label for="purchaseAmountMean">Purchase Amount Mean</label>
         <input type="number" id="purchaseAmountMean" value="0" />
         <label for="purchaseAmountDeviation">Purchase Amount Deviation</label>
-        <input type="number" id="purchaseAmountDeviation" value="1.5" />
+        <input type="number" id="purchaseAmountDeviation" value="1.5" step="0.1" />
         <label for="minimumDaysHeld">Minimum Days Held</label>
-        <input type="number" id="minimumDaysHeld" value="10" />
+        <input type="number" id="minimumDaysHeld" value="10" min="0" step="1" />
         <label for="saleProbability">Sale Probability</label>
         <input
           type="range"
@@ -135,7 +137,7 @@
         />
         <div class="slider-values">
           <span class="min-value">0%</span>
-          <span class="current-value">1%</span>
+          <span class="current-value">1.0%</span>
           <span class="max-value">100%</span>
         </div>
       </section>
@@ -145,7 +147,7 @@
       function updateSliderPercent(slider) {
         const currentValueSpan =
           slider.nextElementSibling.querySelector(".current-value");
-        currentValueSpan.textContent = `${Math.floor(slider.value * 100)}%`;
+        currentValueSpan.textContent = `${(slider.value * 100).toFixed(1)}%`;
       }
     </script>
     <script type="module" src="/main.js"></script>
