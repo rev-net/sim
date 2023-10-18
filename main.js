@@ -6,9 +6,10 @@ class LiquidityPool {
    * @param {number} eth - The initial amount of ETH liquidity.
    * @param {number} revnetToken - The initial amount of Revnet Token liquidity.
    */
-  constructor(eth, revnetToken) {
+  constructor(eth, revnetToken, dayDeployed) {
     this.eth = eth;
     this.revnetToken = revnetToken;
+    this.dayDeployed = dayDeployed;
   }
 
   /**
@@ -241,6 +242,7 @@ class Trader {
 function purchaseRevnetTokens(ethSpent, r, p) {
   let source, revnetTokensReceived;
   if (
+    r.day >= p.dayDeployed &&
     p.revnetToken > p.getRevnetTokenReturn(ethSpent) &&
     p.getRevnetTokenReturn(ethSpent) > r.getTokensCreatedPerEth() * ethSpent
   ) {
@@ -269,6 +271,7 @@ function sellRevnetTokens(revnetTokensSpent, r, p) {
   let source,
     ethReceived = 0;
   if (
+    r.day >= p.dayDeployed &&
     p.eth > p.getEthReturn(revnetTokensSpent) &&
     p.getEthReturn(revnetTokensSpent) > r.getEthReclaimAmount(revnetTokensSpent)
   ) {
@@ -330,6 +333,7 @@ function simulate() {
     document.getElementById("boostDurationInDays").value
   );
   const premintAmount = Number(document.getElementById("premintAmount").value);
+  const dayDeployed = Number(document.getElementById("dayDeployed").value);
   const eth = Number(document.getElementById("eth").value);
   const revnetToken = Number(document.getElementById("revnetToken").value);
   const daysToCalculate = Number(
@@ -360,9 +364,9 @@ function simulate() {
     document.getElementById("minimumDaysHeld").value
   );
 
-  const poissonRand = newLCG(randomnessSeed + 2)
+  const poissonRand = newLCG(randomnessSeed + 2);
   const buyRand = newLCG(randomnessSeed);
-  const sellRand = newLCG(randomnessSeed + 1)
+  const sellRand = newLCG(randomnessSeed + 1);
 
   const r = new Revnet(
     priceCeilingIncreasePercentage,
@@ -372,7 +376,7 @@ function simulate() {
     boostPercent,
     boostDurationInDays
   );
-  const p = new LiquidityPool(eth, revnetToken);
+  const p = new LiquidityPool(eth, revnetToken, dayDeployed);
   if (revnetToken) r.tokenSupply += revnetToken; // Add initial liquidity pool supply to outstanding token supply.
   const traders = [];
   const simulationResults = [];
@@ -380,7 +384,11 @@ function simulate() {
   for (; r.day < daysToCalculate; r.incrementDay()) {
     // Make purchases
     const dailyPurchases = [];
-    for (let i = 0; i < poissonRandomNumber(dailyPurchasesLambda, poissonRand); i++) {
+    for (
+      let i = 0;
+      i < poissonRandomNumber(dailyPurchasesLambda, poissonRand);
+      i++
+    ) {
       const t = new Trader();
       const ethSpent = logNormRandomNumber(
         purchaseAmountMean,
@@ -393,7 +401,8 @@ function simulate() {
         p
       );
       t.recordPurchase(ethSpent, revnetTokensReceived, source, r.day);
-      p.provideRevnetTokens(revnetTokenLiquidityRatio * revnetTokensReceived);
+      if (r.day >= p.dayDeployed)
+        p.provideRevnetTokens(revnetTokenLiquidityRatio * revnetTokensReceived);
       traders.push(t);
       dailyPurchases.push({ ethSpent, revnetTokensReceived, source });
     }
@@ -406,9 +415,14 @@ function simulate() {
       if (sellRand() < saleProbability) {
         const revnetTokensSpent =
           t.purchase.revnetTokensReceived * (1 - revnetTokenLiquidityRatio);
-        const { ethReceived, source } = sellRevnetTokens(revnetTokensSpent, r, p);
+        const { ethReceived, source } = sellRevnetTokens(
+          revnetTokensSpent,
+          r,
+          p
+        );
         t.recordSale(revnetTokensSpent, ethReceived, source, r.day);
-        p.provideEth(ethLiquidityRatio * ethReceived);
+        if (r.day >= p.dayDeployed)
+          p.provideEth(ethLiquidityRatio * ethReceived);
         dailySales.push({ revnetTokensSpent, ethReceived, source });
       }
     });
@@ -427,6 +441,12 @@ function simulate() {
       poolEthBalance: p.eth,
       poolRevnetTokenBalance: p.revnetToken,
       poolRevnetTokenPrice: p.getMarginalPriceOfRevnetToken(),
+      oneTokenReclaimAmount: r.getEthReclaimAmount(1),
+      fiveTokenReclaimAmount: r.getEthReclaimAmount(5),
+      tenTokenReclaimAmount: r.getEthReclaimAmount(10),
+      tokensForOneEth: r.getTokensNeededToClaimEthAmount(1),
+      tokensForFiveEth: r.getTokensNeededToClaimEthAmount(5),
+      tokensForTenEth: r.getTokensNeededToClaimEthAmount(10),
       dailyPurchases,
       dailySales,
     });
@@ -876,7 +896,96 @@ function main() {
       ),
     ],
   });
+  
+  const tokenReclaimAmountPlot = Plot.plot({
+    title: "Price Floor Values",
+    style: chartStyles,
+    x: { label: "Day"},
+    y: { label: "ETH", grid: true},
+    marks: [
+      Plot.ruleY([0]),
+      Plot.ruleX(simulationData, Plot.pointerX({x: "day", stroke: solar.base01})),
+      Plot.line(simulationData, {
+        x: "day",
+        y: "oneTokenReclaimAmount",
+        stroke: solar.violet,
+      }),
+      Plot.line(simulationData, {
+        x: "day",
+        y: "fiveTokenReclaimAmount",
+        stroke: solar.orange,
+      }),
+      Plot.line(simulationData, {
+        x: "day",
+        y: "tenTokenReclaimAmount",
+        stroke: solar.yellow,
+      })
+    ]
+  })
 
+  const tokensToClaimEthPlot = Plot.plot({
+    title: "Revnet Tokens To Reclaim ETH Amounts at Price Floor",
+    style: chartStyles,
+    x: { label: "Day" },
+    y: { label: "Tokens", grid: true },
+    marks: [
+      Plot.ruleY([0]),
+      Plot.ruleX(
+        simulationData,
+        Plot.pointerX({ x: "day", stroke: solar.base01 })
+      ),
+      Plot.text(simulationData, Plot.pointerX({
+        px: "day",
+        dy: -18,
+        frameAnchor: "top-right",
+        text: (d) => [
+          `Day: ${d.day}`,
+          `For 1Ξ: ${d.tokensForOneEth.toFixed(2)}`,
+          `For 5Ξ: ${d.tokensForFiveEth.toFixed(2)}`,
+          `For 10Ξ: ${d.tokensForTenEth.toFixed(2)}`,
+        ].join("    ")
+      })),
+      Plot.line(simulationData, {
+        x: "day",
+        y: "tokensForOneEth",
+        stroke: solar.magenta,
+      }),
+      Plot.text(simulationData, Plot.selectLast({
+        x: "day",
+        y: "tokensForOneEth",
+        fill: solar.magenta,
+        dx: 3,
+        textAnchor: "start",
+        text: () => "Tokens for 1Ξ"
+      })),
+      Plot.line(simulationData, {
+        x: "day",
+        y: "tokensForFiveEth",
+        stroke: solar.cyan,
+      }),
+      Plot.text(simulationData, Plot.selectLast({
+        x: "day",
+        y: "tokensForFiveEth",
+        fill: solar.cyan,
+        dx: 3,
+        textAnchor: "start",
+        text: () => "Tokens for 5Ξ"
+      })),
+      Plot.line(simulationData, {
+        x: "day",
+        y: "tokensForTenEth",
+        stroke: solar.green,
+      }),
+      Plot.text(simulationData, Plot.selectLast({
+        x: "day",
+        y: "tokensForTenEth",
+        fill: solar.green,
+        dx: 3,
+        textAnchor: "start",
+        text: () => "Tokens for 10Ξ"
+      })),
+    ],
+  });
   const purchaseData = traders.filter((t) => t.purchase).map((t) => t.purchase);
 
   const purchasePlot = Plot.plot({
@@ -915,6 +1024,30 @@ function main() {
       profit: t.sale.ethReceived - t.purchase.ethSpent,
       tokensPurchased: t.purchase.revnetTokensReceived,
     }));
+
+  console.time("iterate");
+  let avgProfit = 0,
+    avgDaysHeld = 0,
+    salesThroughRevnet = 0,
+    purchasesThroughRevnet = 0,
+    avgTransactionSize = 0;
+  for (let trader of traders) {
+  }
+
+  let volatility = 0,
+    priceFloorDailyChange = 0;
+
+  for (let sale of saleData) {
+    avgProfit += sale.profit;
+    avgDaysHeld += sale.daysHeld;
+    if (sale.saleSource === "revnet") salesThroughRevnet++;
+  }
+  avgProfit /= saleData.length;
+  avgDaysHeld /= saleData.length;
+  salesThroughRevnet /= saleData.length;
+  console.timeLog("iterate");
+  console.table(avgProfit, avgDaysHeld, salesThroughRevnet);
+  console.timeEnd("iterate");
 
   const salePlot = Plot.plot({
     title: "Sales",
@@ -964,11 +1097,14 @@ function main() {
     ],
   });
 
+
   dashboard.appendChild(tokenPricePlot);
   dashboard.appendChild(revnetPlot);
   dashboard.appendChild(liquidityPoolPlot);
   dashboard.appendChild(boostPlot);
   dashboard.appendChild(cumulativeVolumesPlot);
+  dashboard.appendChild(tokenReclaimAmountPlot);
+  dashboard.appendChild(tokensToClaimEthPlot);
   dashboard.appendChild(profitabilityPlot);
   dashboard.appendChild(purchasePlot);
   dashboard.appendChild(salePlot);
