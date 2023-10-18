@@ -187,36 +187,6 @@ class Revnet {
     return 1 / this.getTokensCreatedPerEth();
   }
 
-  /**
-   * Get the number of tokens you need to destroy to reclaim a given amount of ETH.
-   * @param {number} ethAmount The amount of ETH returned.
-   * @return {number} The token price floor, or the number of tokens needed to reclaim ethAmount.
-   */
-  getTokensNeededToClaimEthAmount(ethAmount) {
-    const sqrtTerm = Math.sqrt(
-      this.ethBalance *
-        (4 * this.priceFloorTaxIntensity * ethAmount +
-          this.ethBalance -
-          2 * this.priceFloorTaxIntensity * this.ethBalance +
-          this.priceFloorTaxIntensity *
-            this.priceFloorTaxIntensity *
-            this.ethBalance)
-    );
-
-    const x1 =
-      (-this.tokenSupply * this.ethBalance +
-        this.priceFloorTaxIntensity * this.tokenSupply * this.ethBalance -
-        this.tokenSupply * sqrtTerm) /
-      (2 * this.priceFloorTaxIntensity * this.ethBalance);
-    const x2 =
-      (-this.tokenSupply * this.ethBalance +
-        this.priceFloorTaxIntensity * this.tokenSupply * this.ethBalance +
-        this.tokenSupply * sqrtTerm) /
-      (2 * this.priceFloorTaxIntensity * this.ethBalance);
-
-    return x1 > x2 ? x1 : x2;
-  }
-
   incrementDay() {
     this.day += 1;
   }
@@ -444,9 +414,6 @@ function simulate() {
       oneTokenReclaimAmount: r.getEthReclaimAmount(1),
       fiveTokenReclaimAmount: r.getEthReclaimAmount(5),
       tenTokenReclaimAmount: r.getEthReclaimAmount(10),
-      tokensForOneEth: r.getTokensNeededToClaimEthAmount(1),
-      tokensForFiveEth: r.getTokensNeededToClaimEthAmount(5),
-      tokensForTenEth: r.getTokensNeededToClaimEthAmount(10),
       dailyPurchases,
       dailySales,
     });
@@ -896,96 +863,84 @@ function main() {
       ),
     ],
   });
-  
-  const tokenReclaimAmountPlot = Plot.plot({
-    title: "Price Floor Values",
-    style: chartStyles,
-    x: { label: "Day"},
-    y: { label: "ETH", grid: true},
-    marks: [
-      Plot.ruleY([0]),
-      Plot.ruleX(simulationData, Plot.pointerX({x: "day", stroke: solar.base01})),
-      Plot.line(simulationData, {
-        x: "day",
-        y: "oneTokenReclaimAmount",
-        stroke: solar.violet,
-      }),
-      Plot.line(simulationData, {
-        x: "day",
-        y: "fiveTokenReclaimAmount",
-        stroke: solar.orange,
-      }),
-      Plot.line(simulationData, {
-        x: "day",
-        y: "tenTokenReclaimAmount",
-        stroke: solar.yellow,
-      })
-    ]
-  })
 
-  const tokensToClaimEthPlot = Plot.plot({
-    title: "Revnet Tokens To Reclaim ETH Amounts at Price Floor",
+  const tokenReclaimAmountPlot = Plot.plot({
+    title: "Price Floor Reclaim Values",
     style: chartStyles,
     x: { label: "Day" },
-    y: { label: "Tokens", grid: true },
+    y: { label: "ETH", grid: true },
     marks: [
       Plot.ruleY([0]),
       Plot.ruleX(
         simulationData,
         Plot.pointerX({ x: "day", stroke: solar.base01 })
       ),
-      Plot.text(simulationData, Plot.pointerX({
-        px: "day",
-        dy: -18,
-        frameAnchor: "top-right",
-        text: (d) => [
-          `Day: ${d.day}`,
-          `For 1Ξ: ${d.tokensForOneEth.toFixed(2)}`,
-          `For 5Ξ: ${d.tokensForFiveEth.toFixed(2)}`,
-          `For 10Ξ: ${d.tokensForTenEth.toFixed(2)}`,
-        ].join("    ")
-      })),
+      Plot.text(
+        simulationData,
+        Plot.pointerX({
+          px: "day",
+          dy: -18,
+          frameAnchor: "top-right",
+          text: (d) =>
+            [
+              `Day: ${d.day}`,
+              `1 Token -> ${d.oneTokenReclaimAmount.toFixed(2)}Ξ`,
+              `5 Tokens -> ${d.fiveTokenReclaimAmount.toFixed(2)}Ξ`,
+              `10 Tokens -> ${d.tenTokenReclaimAmount.toFixed(2)}Ξ`,
+            ].join("    "),
+        })
+      ),
       Plot.line(simulationData, {
         x: "day",
-        y: "tokensForOneEth",
-        stroke: solar.magenta,
-      }),
-      Plot.text(simulationData, Plot.selectLast({
-        x: "day",
-        y: "tokensForOneEth",
-        fill: solar.magenta,
-        dx: 3,
-        textAnchor: "start",
-        text: () => "Tokens for 1Ξ"
-      })),
-      Plot.line(simulationData, {
-        x: "day",
-        y: "tokensForFiveEth",
-        stroke: solar.cyan,
-      }),
-      Plot.text(simulationData, Plot.selectLast({
-        x: "day",
-        y: "tokensForFiveEth",
-        fill: solar.cyan,
-        dx: 3,
-        textAnchor: "start",
-        text: () => "Tokens for 5Ξ"
-      })),
-      Plot.line(simulationData, {
-        x: "day",
-        y: "tokensForTenEth",
+        y: "oneTokenReclaimAmount",
         stroke: solar.green,
       }),
-      Plot.text(simulationData, Plot.selectLast({
+      Plot.text(
+        simulationData,
+        Plot.selectLast({
+          x: "day",
+          y: "oneTokenReclaimAmount",
+          fill: solar.green,
+          dx: 3,
+          textAnchor: "start",
+          text: () => "1 Token",
+        })
+      ),
+      Plot.line(simulationData, {
         x: "day",
-        y: "tokensForTenEth",
-        fill: solar.green,
-        dx: 3,
-        textAnchor: "start",
-        text: () => "Tokens for 10Ξ"
-      })),
+        y: "fiveTokenReclaimAmount",
+        stroke: solar.violet,
+      }),
+      Plot.text(
+        simulationData,
+        Plot.selectLast({
+          x: "day",
+          y: "fiveTokenReclaimAmount",
+          fill: solar.violet,
+          dx: 3,
+          textAnchor: "start",
+          text: () => "5 Tokens",
+        })
+      ),
+      Plot.line(simulationData, {
+        x: "day",
+        y: "tenTokenReclaimAmount",
+        stroke: solar.cyan,
+      }),
+      Plot.text(
+        simulationData,
+        Plot.selectLast({
+          x: "day",
+          y: "tenTokenReclaimAmount",
+          fill: solar.cyan,
+          dx: 3,
+          textAnchor: "start",
+          text: () => "10 Tokens",
+        })
+      ),
     ],
   });
+
   const purchaseData = traders.filter((t) => t.purchase).map((t) => t.purchase);
 
   const purchasePlot = Plot.plot({
@@ -1097,14 +1052,12 @@ function main() {
     ],
   });
 
-
   dashboard.appendChild(tokenPricePlot);
   dashboard.appendChild(revnetPlot);
   dashboard.appendChild(liquidityPoolPlot);
   dashboard.appendChild(boostPlot);
   dashboard.appendChild(cumulativeVolumesPlot);
   dashboard.appendChild(tokenReclaimAmountPlot);
-  dashboard.appendChild(tokensToClaimEthPlot);
   dashboard.appendChild(profitabilityPlot);
   dashboard.appendChild(purchasePlot);
   dashboard.appendChild(salePlot);
