@@ -1,4 +1,5 @@
 import * as Plot from "@observablehq/plot";
+const html = String.raw;
 
 class LiquidityPool {
   /**
@@ -981,27 +982,34 @@ function main() {
     }));
 
   console.time("iterate");
-  let avgProfit = 0,
+  let avgReturn = 0,
     avgDaysHeld = 0,
+    avgSaleSize = 0,
     salesThroughRevnet = 0,
+    saleCount = 0,
     purchasesThroughRevnet = 0,
-    avgTransactionSize = 0;
+    avgPurchaseSize = 0,
+    purchaseCount = 0;
   for (let trader of traders) {
-  }
+    if (trader.purchase) {
+      if (trader.purchase.source === "revnet") purchasesThroughRevnet++;
+      avgPurchaseSize += trader.purchase.ethSpent;
+      purchaseCount++;
+    }
 
-  let volatility = 0,
-    priceFloorDailyChange = 0;
-
-  for (let sale of saleData) {
-    avgProfit += sale.profit;
-    avgDaysHeld += sale.daysHeld;
-    if (sale.saleSource === "revnet") salesThroughRevnet++;
+    if (trader.sale) {
+      saleCount++;
+      avgReturn += trader.sale.ethReceived - trader.purchase.ethSpent;
+      avgDaysHeld += trader.sale.day - trader.purchase.day;
+      avgSaleSize += trader.sale.ethReceived;
+      if (trader.sale.source === "revnet") salesThroughRevnet++;
+    }
   }
-  avgProfit /= saleData.length;
-  avgDaysHeld /= saleData.length;
-  salesThroughRevnet /= saleData.length;
-  console.timeLog("iterate");
-  console.table(avgProfit, avgDaysHeld, salesThroughRevnet);
+  avgPurchaseSize /= purchaseCount;
+
+  avgReturn /= saleCount;
+  avgDaysHeld /= saleCount;
+  avgSaleSize /= saleCount;
   console.timeEnd("iterate");
 
   const salePlot = Plot.plot({
@@ -1052,6 +1060,51 @@ function main() {
     ],
   });
 
+  dashboard.innerHTML += html`<table>
+    <tr>
+      <th>Category</th>
+      <th>Value</th>
+    </tr>
+    <tr>
+      <td>Average Trader Return</td>
+      <td>${avgReturn > 0 ? "+" : ""}${avgReturn.toFixed(2)}Ξ</td>
+    </tr>
+    <tr>
+      <td>Purchase Count</td>
+      <td>${purchaseCount}</td>
+    </tr>
+    <tr>
+      <td>Purchases via Revnet</td>
+      <td>
+        ${purchasesThroughRevnet}
+        (${((100 * purchasesThroughRevnet) / purchaseCount).toFixed(2)}%)
+      </td>
+    </tr>
+    <tr>
+      <td>Average Purchase Size</td>
+      <td>${avgPurchaseSize.toFixed(2)}Ξ</td>
+    </tr>
+    <tr>
+      <td>Sale Count</td>
+      <td>${saleCount}</td>
+    </tr>
+    <tr>
+      <td>Sales via Revnet</td>
+      <td>
+        ${salesThroughRevnet}
+        (${((100 * salesThroughRevnet) / saleCount).toFixed(2)}%)
+      </td>
+    </tr>
+    <tr>
+      <td>Average Sale Size</td>
+      <td>${avgSaleSize.toFixed(2)}Ξ</td>
+    </tr>
+    <tr>
+      <td>Average Days Held</td>
+      <td>${avgDaysHeld.toFixed(2)}</td>
+    </tr>
+  </table>`;
+
   dashboard.appendChild(tokenPricePlot);
   dashboard.appendChild(revnetPlot);
   dashboard.appendChild(liquidityPoolPlot);
@@ -1061,6 +1114,7 @@ function main() {
   dashboard.appendChild(profitabilityPlot);
   dashboard.appendChild(purchasePlot);
   dashboard.appendChild(salePlot);
+
   console.timeEnd("main");
 }
 

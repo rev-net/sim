@@ -72,3 +72,18 @@ label {
   flex-wrap: wrap;
   justify-content: space-evenly;
 }
+
+table {
+  border-collapse: collapse;
+  color: var(--base02);
+  font-size: large;
+}
+table td, table th {
+  border: 1px solid var(--base00);
+  padding: 10px;
+}
+table tr:nth-child(even){background-color: var(--base2);}
+table th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
