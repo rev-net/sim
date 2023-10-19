@@ -1,6 +1,14 @@
 import * as Plot from "@observablehq/plot";
 const html = String.raw;
 
+/**
+ * TODO:
+ * Traders should withdraw liquidity eventually (sale is simple. how for purchase?)
+ * JSON-encode parameters. Download and upload settings. URL-encoded base64 as well.
+ * Price floor per token destroyed chart.
+ * "Intelligent" LPs.
+ */
+
 class LiquidityPool {
   /**
    * Create a simplified constant product AMM liquidity pool (x*y==k).
