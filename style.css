@@ -21,6 +21,10 @@
   font-family: "Times New Roman", Times, serif;
 }
 
+body {
+  padding-top: 30px;
+}
+
 input {
   background-color: var(--base3);
   color: var(--base02);
@@ -78,12 +82,28 @@ table {
   color: var(--base02);
   font-size: large;
 }
-table td, table th {
+table td,
+table th {
   border: 1px solid var(--base00);
   padding: 10px;
 }
-table tr:nth-child(even){background-color: var(--base2);}
+table tr:nth-child(even) {
+  background-color: var(--base2);
+}
 table th {
   padding-top: 12px;
   padding-bottom: 12px;
+}
+
+#help-bar {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: var(--base2);
+  color: var(--base02);
+  padding: 10px;
+  font-weight: bold;
+  border-bottom: 1px solid var(--base03);
 }

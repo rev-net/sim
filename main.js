@@ -423,12 +423,6 @@ function simulate() {
   return [simulationResults, traders];
 }
 
-/*
- * TODO:
- * Make LP more realistic. Make traders "intelligent".
- * Descriptions for parameters
- */
-
 const solar = {
   base03: "#002b36",
   base02: "#073642",
@@ -448,6 +442,7 @@ const solar = {
   green: "#859900",
 };
 
+const helpBar = document.getElementById("help-bar");
 const dashboard = document.getElementById("dashboard");
 const chartStyles = {
   color: solar.base01,
@@ -558,9 +553,10 @@ function main() {
       ),
     ],
   });
+  tokenPricePlot.setAttribute("data-help", "This chart shows the token's AMM price moving between the Revnet's price ceiling and price floor.")
 
-  const revnetPlot = Plot.plot({
-    title: "Revnet Balances",
+  const revnetBalancesPlot = Plot.plot({
+    title: "Revnet Balance and Token Supply",
     style: chartStyles,
     x: { label: "Day" },
     y: { label: "Amount", grid: true },
@@ -574,8 +570,8 @@ function main() {
           text: (d) =>
             [
               `Day: ${d.day}`,
-              `Token Supply: ${d.tokenSupply.toFixed(2)}`,
-              `ETH Balance: ${d.ethBalance.toFixed(2)} Ξ`,
+              `Total Token Supply: ${d.tokenSupply.toFixed(2)}`,
+              `ETH in Revnet: ${d.ethBalance.toFixed(2)} Ξ`,
             ].join("     "),
         })
       ),
@@ -598,7 +594,7 @@ function main() {
           x: "day",
           y: "tokenSupply",
           dx: 3,
-          text: () => "Token Supply",
+          text: () => "Total Token Supply",
           textAnchor: "start",
           fill: solar.red,
         })
@@ -614,13 +610,14 @@ function main() {
           x: "day",
           y: "ethBalance",
           dx: 3,
-          text: () => "ETH Balance",
+          text: () => "ETH in Revnet",
           textAnchor: "start",
           fill: solar.blue,
         })
       ),
     ],
   });
+  revnetBalancesPlot.setAttribute("data-help", "The Revnet's current token supply and ETH balance over time.")
 
   const liquidityPoolPlot = Plot.plot({
     title: "Liquidity Pool Balances",
@@ -637,8 +634,8 @@ function main() {
           text: (d) =>
             [
               `Day: ${d.day}`,
-              `Token Liquidity: ${d.poolRevnetTokenBalance.toFixed(2)}`,
-              `ETH Liquidity: ${d.poolEthBalance.toFixed(2)} Ξ`,
+              `Token Balance: ${d.poolRevnetTokenBalance.toFixed(2)}`,
+              `ETH Balance: ${d.poolEthBalance.toFixed(2)} Ξ`,
             ].join("    "),
         })
       ),
@@ -661,7 +658,7 @@ function main() {
           x: "day",
           y: "poolRevnetTokenBalance",
           dx: 3,
-          text: () => "Token Liquidity",
+          text: () => "Token Balance",
           textAnchor: "start",
           fill: solar.red,
         })
@@ -677,13 +674,14 @@ function main() {
           x: "day",
           y: "poolEthBalance",
           dx: 3,
-          text: () => "ETH Liquidity",
+          text: () => "ETH Balance",
           textAnchor: "start",
           fill: solar.blue,
         })
       ),
     ],
   });
+  liquidityPoolPlot.setAttribute("data-help", "The liquidity pool's ETH and token balances over time.")
 
   const boostPlot = Plot.plot({
     title: "Cumulative Tokens Sent to Boost",
@@ -719,6 +717,7 @@ function main() {
       }),
     ],
   });
+  boostPlot.setAttribute("data-help", "The cumulative number of tokens sent to the boost address, including the premint.")
 
   const purchases = simulationData.flatMap((v) =>
     v.dailyPurchases.map((p) => {
@@ -864,12 +863,13 @@ function main() {
       ),
     ],
   });
+  cumulativeVolumesPlot.setAttribute("data-help", "Totals for ETH/token spending and receiving across the Revnet and the liquidity pool.")
 
   const tokenReclaimAmountPlot = Plot.plot({
     title: "Price Floor Reclaim Values",
     style: chartStyles,
     x: { label: "Day" },
-    y: { label: "ETH", grid: true },
+    y: { label: "ETH (Ξ)", grid: true },
     marks: [
       Plot.ruleY([0]),
       Plot.ruleX(
@@ -941,6 +941,7 @@ function main() {
       ),
     ],
   });
+  tokenReclaimAmountPlot.setAttribute("data-help", "The amount of ETH which can be reclaimed from the Revnet by destroying 1, 5, or 10 tokens at the price floor over time.")
 
   const purchaseData = traders.filter((t) => t.purchase).map((t) => t.purchase);
 
@@ -967,6 +968,7 @@ function main() {
       }),
     ],
   });
+  purchasePlot.setAttribute("data-help", "Purchase amounts over time. Crosses were fulfilled by the Revnet, and circles were fulfilled by the liquidity pool.")
 
   const saleData = traders
     .filter((t) => t.sale)
@@ -1035,20 +1037,21 @@ function main() {
       }),
     ],
   });
+  salePlot.setAttribute("data-help", "Sale amounts over time. Crosses were fulfilled by the Revnet, and circles were fulfilled by the liquidity pool.")
 
   const profitabilityPlot = Plot.plot({
-    title: "Profitability",
+    title: "Days Held vs. Return",
     style: chartStyles,
     grid: true,
     color: {
       scheme: "Warm",
       legend: true,
-      label: "Day Purchased",
-      style: { background: "none" },
+      label: "Day of Initial Purchase",
+      style: { background: "none", fontSize: "12px" },
     },
     r: { label: "Tokens Purchased" },
     x: { label: "Days Held" },
-    y: { label: "Profit (ETH)" },
+    y: { label: "Return (Ξ)" },
     marks: [
       Plot.dot(saleData, {
         x: "daysHeld",
@@ -1059,6 +1062,7 @@ function main() {
       }),
     ],
   });
+  profitabilityPlot.setAttribute("data-help", "The x axis reflects the number of days a trader held their tokens, and the y axis reflects their return from selling. Larger dots represent greater token balances. Colors correpond to the initial purchase date.");
 
   dashboard.innerHTML += html`<table>
     <tr>
@@ -1066,7 +1070,7 @@ function main() {
       <th>Value</th>
     </tr>
     <tr>
-      <td>Average Trader Return</td>
+      <td>Average Return</td>
       <td>${avgReturn > 0 ? "+" : ""}${avgReturn.toFixed(2)}Ξ</td>
     </tr>
     <tr>
@@ -1105,15 +1109,27 @@ function main() {
     </tr>
   </table>`;
 
-  dashboard.appendChild(tokenPricePlot);
-  dashboard.appendChild(revnetPlot);
-  dashboard.appendChild(liquidityPoolPlot);
-  dashboard.appendChild(boostPlot);
-  dashboard.appendChild(cumulativeVolumesPlot);
-  dashboard.appendChild(tokenReclaimAmountPlot);
-  dashboard.appendChild(profitabilityPlot);
-  dashboard.appendChild(purchasePlot);
-  dashboard.appendChild(salePlot);
+  [
+    tokenPricePlot,
+    profitabilityPlot,
+    revnetBalancesPlot,
+    liquidityPoolPlot,
+    cumulativeVolumesPlot,
+    tokenReclaimAmountPlot,
+    purchasePlot,
+    salePlot,
+    boostPlot,
+  ].forEach((p) => {
+    dashboard.appendChild(p);
+
+    p.addEventListener("mouseenter", function (event) {
+      helpBar.textContent = event.target.getAttribute("data-help");
+      helpBar.style.display = "block";
+    });
+    p.addEventListener("mouseleave", function () {
+      helpBar.style.display = "none";
+    });
+  });
 
   console.timeEnd("main");
 }
