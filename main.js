@@ -1,5 +1,35 @@
+/*********************************************
+ * SECTION 1: IMPORTS AND CONSTANTS
+*********************************************/
 import * as Plot from "@observablehq/plot";
 const html = String.raw;
+const solar = {
+  base03: "#002b36",
+  base02: "#073642",
+  base01: "#586e75",
+  base00: "#657b83",
+  base0: "#839496",
+  base1: "#93a1a1",
+  base2: "#eee8d5",
+  base3: "#fdf6e3",
+  yellow: "#b58900",
+  orange: "#cb4b16",
+  red: "#dc322f",
+  magenta: "#d33682",
+  violet: "#6c71c4",
+  blue: "#268bd2",
+  cyan: "#2aa198",
+  green: "#859900",
+};
+const helpBar = document.getElementById("help-bar");
+const dashboard = document.getElementById("dashboard");
+const plotStyles = {
+  color: solar.base01,
+  backgroundColor: solar.base3,
+  fontSize: "16px",
+  fontFamily: "'Times New Roman', Times, serif",
+  overflow: "visible",
+};
 
 /**
  * TODO:
@@ -10,16 +40,59 @@ const html = String.raw;
  * Liquidity fee.
  */
 
+/*********************************************
+ * SECTION 2: UTILITY FUNCTIONS
+*********************************************/
+function newLCG(seed) {
+  const a = 1664525;
+  const c = 1013904223;
+  const m = 2 ** 32;
+  let currentSeed = seed;
+
+  return function () {
+    currentSeed = (a * currentSeed + c) % m;
+    return currentSeed / m;
+  };
+}
+
+function poissonRandomNumber(lambda, rand) {
+  let L = Math.exp(-lambda);
+  let k = 0;
+  let p = 1;
+
+  do {
+    k++;
+    p *= rand();
+  } while (p > L);
+
+  return k - 1;
+}
+
+function normalRandomNumber(rand) {
+  return Math.sqrt(-2.0 * Math.log(rand())) * Math.cos(2.0 * Math.PI * rand());
+}
+
+function logNormRandomNumber(mu, sigma, rand) {
+  return Math.exp(sigma * normalRandomNumber(rand) + mu);
+}
+
+/*********************************************
+ * SECTION 3: CLASSES
+*********************************************/
 class LiquidityPool {
   /**
    * Create a simplified constant product AMM liquidity pool (x*y==k).
    * @param {number} eth - The initial amount of ETH liquidity.
    * @param {number} revnetToken - The initial amount of Revnet Token liquidity.
    */
-  constructor(eth, revnetToken, dayDeployed) {
+  constructor(eth, revnetToken, dayDeployed, fee) {
     this.eth = eth;
     this.revnetToken = revnetToken;
     this.dayDeployed = dayDeployed;
+    this.fee = fee
+    
+    this.ethFeesAccumulated = 0
+    this.revnetTokenFeesAccumulated = 0
   }
 
   /**
@@ -59,7 +132,7 @@ class LiquidityPool {
     const invariant = this.eth * this.revnetToken;
     const newRevnetTokenBalance = this.revnetToken + revnetTokenAmount;
     const newEthBalance = invariant / newRevnetTokenBalance;
-    return this.eth - newEthBalance;
+    return (this.eth - newEthBalance) * (1 - this.fee);
   }
 
   /**
@@ -71,7 +144,7 @@ class LiquidityPool {
     const invariant = this.eth * this.revnetToken;
     const newEthBalance = this.eth + ethAmount;
     const newRevnetTokenBalance = invariant / newEthBalance;
-    return this.revnetToken - newRevnetTokenBalance;
+    return (this.revnetToken - newRevnetTokenBalance) * (1 - this.fee);
   }
 
   /**
@@ -84,9 +157,11 @@ class LiquidityPool {
     const newRevnetTokenBalance = this.revnetToken + revnetTokenAmount;
     const newEthBalance = invariant / newRevnetTokenBalance;
     const ethAmount = this.eth - newEthBalance;
+    const ethFeeAmount = ethAmount * this.fee
     this.revnetToken = newRevnetTokenBalance;
     this.eth = newEthBalance;
-    return ethAmount;
+    this.ethFeesAccumulated += ethFeeAmount
+    return ethAmount - ethFeeAmount
   }
   /**
    * Spend ETH to buy Revnet tokens.
@@ -98,9 +173,11 @@ class LiquidityPool {
     const newEthBalance = this.eth + ethAmount;
     const newRevnetTokenBalance = invariant / newEthBalance;
     const revnetTokenAmount = this.revnetToken - newRevnetTokenBalance;
+    const revnetTokenFeeAmount = revnetTokenAmount * this.fee
     this.eth = newEthBalance;
     this.revnetToken = newRevnetTokenBalance;
-    return revnetTokenAmount;
+    this.revnetTokenFeesAccumulated += revnetTokenFeeAmount
+    return revnetTokenAmount - revnetTokenFeeAmount
   }
 }
 
@@ -212,6 +289,27 @@ class Trader {
   }
 }
 
+/*class Simulator {
+  constructor(r, p, params) {
+    this.revnet = r;
+    this.pool = p;
+    this.traders = []
+
+    this.daysToCalculate = params.daysToCalculate;
+    this.randomnessSeed = params.randomnessSeed;
+    this.dailyPurchasesLambda = params.dailyPurchasesLambda;
+    this.purchaseAmountMean = params.purchaseAmountMean;
+    this.purchaseAmountDeviation = params.purchaseAmountDeviation;
+    this.revnetTokenLiquidityRatio = params.revnetTokenLiquidityRatio;
+    this.ethLiquidityRatio = params.ethLiquidityRatio;
+    this.saleProbability = params.saleProbability;
+    this.minimumDaysHeld = params.minimumDaysHeld;
+  }
+  
+  purchaseRevnetTokens(ethSpent) {}
+  sellRevnetTokens(revnetTokensSpent) {}
+}*/
+
 /**
  * Function to purchase Revnet tokens, routing payments to the most cost-effective option.
  * @param {number} ethSpent - The amount of ETH spent to purchase tokens.
@@ -265,39 +363,6 @@ function sellRevnetTokens(revnetTokensSpent, r, p) {
   return { ethReceived, source };
 }
 
-function newLCG(seed) {
-  const a = 1664525;
-  const c = 1013904223;
-  const m = 2 ** 32;
-  let currentSeed = seed;
-
-  return function () {
-    currentSeed = (a * currentSeed + c) % m;
-    return currentSeed / m;
-  };
-}
-
-function poissonRandomNumber(lambda, rand) {
-  let L = Math.exp(-lambda);
-  let k = 0;
-  let p = 1;
-
-  do {
-    k++;
-    p *= rand();
-  } while (p > L);
-
-  return k - 1;
-}
-
-function normalRandomNumber(rand) {
-  return Math.sqrt(-2.0 * Math.log(rand())) * Math.cos(2.0 * Math.PI * rand());
-}
-
-function logNormRandomNumber(mu, sigma, rand) {
-  return Math.exp(sigma * normalRandomNumber(rand) + mu);
-}
-
 function simulate() {
   const priceCeilingIncreaseFrequencyInDays = Number(
     document.getElementById("priceCeilingIncreaseFrequencyInDays").value
@@ -316,6 +381,7 @@ function simulate() {
   const dayDeployed = Number(document.getElementById("dayDeployed").value);
   const eth = Number(document.getElementById("eth").value);
   const revnetToken = Number(document.getElementById("revnetToken").value);
+  const liquidityPoolFee = Number(document.getElementById("liquidityPoolFee").value)
   const daysToCalculate = Number(
     document.getElementById("daysToCalculate").value
   );
@@ -356,7 +422,7 @@ function simulate() {
     boostPercent,
     boostDurationInDays
   );
-  const p = new LiquidityPool(eth, revnetToken, dayDeployed);
+  const p = new LiquidityPool(eth, revnetToken, dayDeployed, liquidityPoolFee);
   if (revnetToken) r.tokenSupply += revnetToken; // Add initial liquidity pool supply to outstanding token supply.
   const traders = [];
   const simulationResults = [];
@@ -424,6 +490,8 @@ function simulate() {
       oneTokenReclaimAmount: r.getEthReclaimAmount(1),
       fiveTokenReclaimAmount: r.getEthReclaimAmount(5),
       tenTokenReclaimAmount: r.getEthReclaimAmount(10),
+      ethFeesAccumulated: p.ethFeesAccumulated,
+      revnetTokenFeesAccumulated: p.revnetTokenFeesAccumulated,
       dailyPurchases,
       dailySales,
     });
@@ -432,35 +500,7 @@ function simulate() {
   return [simulationResults, traders];
 }
 
-const solar = {
-  base03: "#002b36",
-  base02: "#073642",
-  base01: "#586e75",
-  base00: "#657b83",
-  base0: "#839496",
-  base1: "#93a1a1",
-  base2: "#eee8d5",
-  base3: "#fdf6e3",
-  yellow: "#b58900",
-  orange: "#cb4b16",
-  red: "#dc322f",
-  magenta: "#d33682",
-  violet: "#6c71c4",
-  blue: "#268bd2",
-  cyan: "#2aa198",
-  green: "#859900",
-};
-
-const helpBar = document.getElementById("help-bar");
-const dashboard = document.getElementById("dashboard");
-const chartStyles = {
-  color: solar.base01,
-  backgroundColor: solar.base3,
-  fontSize: "16px",
-  fontFamily: "'Times New Roman', Times, serif",
-  overflow: "visible",
-};
-function main() {
+function render() {
   console.time("main");
   dashboard.innerHTML = "";
 
@@ -471,7 +511,7 @@ function main() {
 
   const tokenPricePlot = Plot.plot({
     title: "Revnet Token Price",
-    style: chartStyles,
+    style: plotStyles,
     marginLeft: 0,
     x: { label: "Day", insetLeft: 36 },
     y: { label: "ETH (Ξ)" },
@@ -569,7 +609,7 @@ function main() {
 
   const revnetBalancesPlot = Plot.plot({
     title: "Revnet Balance and Token Supply",
-    style: chartStyles,
+    style: plotStyles,
     x: { label: "Day" },
     y: { label: "Amount", grid: true },
     marks: [
@@ -636,7 +676,7 @@ function main() {
 
   const liquidityPoolPlot = Plot.plot({
     title: "Liquidity Pool Balances",
-    style: chartStyles,
+    style: plotStyles,
     x: { label: "Day" },
     y: { label: "Amount", grid: true },
     marks: [
@@ -703,7 +743,7 @@ function main() {
 
   const boostPlot = Plot.plot({
     title: "Cumulative Tokens Sent to Boost",
-    style: chartStyles,
+    style: plotStyles,
     x: { label: "Day" },
     y: { label: "Tokens", grid: true },
     marks: [
@@ -789,7 +829,7 @@ function main() {
 
   const cumulativeVolumesPlot = Plot.plot({
     title: "Cumulative Volumes (Revnet and Pool)",
-    style: chartStyles,
+    style: plotStyles,
     x: { label: "Day" },
     y: { label: "Amount", grid: true },
     marks: [
@@ -891,7 +931,7 @@ function main() {
 
   const tokenReclaimAmountPlot = Plot.plot({
     title: "Price Floor Reclaim Values",
-    style: chartStyles,
+    style: plotStyles,
     x: { label: "Day" },
     y: { label: "ETH (Ξ)", grid: true },
     marks: [
@@ -969,12 +1009,63 @@ function main() {
     "data-help",
     "The amount of ETH which can be reclaimed from the Revnet by destroying 1, 5, or 10 tokens at the price floor over time."
   );
+  
+  const accumulatedFeesPlot = Plot.plot({
+    title: "Cumulative Revenue from Pool Fees",
+    style: plotStyles,
+    x: { label: "Day"},
+    y: {label: "Amount", grid: true},
+    marks: [
+      Plot.text(simulationData, Plot.pointerX({
+        px: "day",
+        dy: -18,
+        frameAnchor: "top-right",
+        text: (d) => [
+          `Day: ${d.day}`,
+          `Revnet Token Fees Accumulated: ${d.revnetTokenFeesAccumulated.toFixed(2)}`,
+          `ETH Fees Accumulated: ${d.ethFeesAccumulated.toFixed(2)} Ξ`
+        ].join("    ")
+      })),
+      Plot.ruleY([0]),
+      Plot.ruleX(simulationData, Plot.pointerX({
+        x: "day",
+        stroke: solar.base01,
+      })),
+      Plot.line(simulationData, {
+        x: "day",
+        y: "revnetTokenFeesAccumulated",
+        stroke: solar.red,
+      }),
+      Plot.text(simulationData, Plot.selectLast({
+        x: "day",
+        y: "revnetTokenFeesAccumulated",
+        fill: solar.red,
+        dx: 3,
+        textAnchor: "start",
+        text: () => "Revnet Token Fees",
+      })),
+      Plot.line(simulationData, {
+        x: "day",
+        y: "ethFeesAccumulated",
+        stroke: solar.blue,
+      }),
+      Plot.text(simulationData, Plot.selectLast({
+        x: "day",
+        y: "ethFeesAccumulated",
+        fill: solar.blue,
+        dx: 3,
+        textAnchor: "start",
+        text: () => "ETH Fees"
+      })),
+    ]
+  })
+  accumulatedFeesPlot.setAttribute("data-help", "Cumulative fees accrued by liquidity providers.")
 
   const purchaseData = traders.filter((t) => t.purchase).map((t) => t.purchase);
 
   const purchasePlot = Plot.plot({
     title: "Purchases",
-    style: chartStyles,
+    style: plotStyles,
     grid: true,
     x: { label: "Day" },
     y: { label: "ETH Spent" },
@@ -1044,7 +1135,7 @@ function main() {
 
   const salePlot = Plot.plot({
     title: "Sales",
-    style: chartStyles,
+    style: plotStyles,
     grid: true,
     x: { label: "Day" },
     y: { label: "ETH Received" },
@@ -1072,7 +1163,7 @@ function main() {
 
   const profitabilityPlot = Plot.plot({
     title: "Days Held vs. Return",
-    style: chartStyles,
+    style: plotStyles,
     grid: true,
     color: {
       scheme: "Warm",
@@ -1152,6 +1243,7 @@ function main() {
     tokenReclaimAmountPlot,
     purchasePlot,
     salePlot,
+    accumulatedFeesPlot,
     boostPlot,
   ].forEach((p) => {
     dashboard.appendChild(p);
@@ -1168,8 +1260,8 @@ function main() {
   console.timeEnd("main");
 }
 
-main();
+render();
 
 document
   .querySelectorAll("input")
-  .forEach((i) => i.addEventListener("input", main));
+  .forEach((i) => i.addEventListener("input", render));
