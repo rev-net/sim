@@ -150,14 +150,15 @@
           <span class="max-value">100%</span>
         </div>
         <label for="liquidityPoolFee">Fee</label>
-        <input type="range"
-        id="liquidityPoolFee"
-        value="0.01"
-        step="0.001"
-        min="0"
-        max="1"
-        oninput="updateSliderPercent(this)"
-        data-help="Fee: The fee taken on trades in the liquidity pool. Fees go to liquidity providers. Fees are typically 0.05%, 0.30%, or 1%."
+        <input
+          type="range"
+          id="liquidityPoolFee"
+          value="0.01"
+          step="0.001"
+          min="0"
+          max="1"
+          oninput="updateSliderPercent(this)"
+          data-help="Fee: The fee taken on trades in the liquidity pool. Fees go to liquidity providers. Fees are typically 0.05%, 0.30%, or 1%."
         />
         <div class="slider-values">
           <span class="min-value">0%</span>
@@ -235,6 +236,12 @@
           <span class="current-value">1.0%</span>
           <span class="max-value">100%</span>
         </div>
+        <button
+          onclick="resetInputs()"
+          data-help="Reset All Inputs: Set all parameters to their initial values."
+        >
+          Reset All Inputs
+        </button>
       </section>
     </div>
     <div id="dashboard"></div>
@@ -243,6 +250,14 @@
         const currentValueSpan =
           slider.nextElementSibling.querySelector(".current-value");
         currentValueSpan.textContent = `${(slider.value * 100).toFixed(1)}%`;
+      }
+
+      function resetInputs() {
+        const inputs = document.querySelectorAll("input");
+        inputs.forEach((i) => {
+          i.value = i.defaultValue;
+          if (i.type === "range") updateSliderPercent(i);
+        });
       }
 
       const helpTextElements = document.querySelectorAll("[data-help]");
