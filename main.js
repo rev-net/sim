@@ -7,6 +7,7 @@ const html = String.raw;
  * JSON-encode parameters. Download and upload settings. URL-encoded base64 as well.
  * Price floor per token destroyed chart.
  * "Intelligent" LPs.
+ * Liquidity fee.
  */
 
 class LiquidityPool {
@@ -561,7 +562,10 @@ function main() {
       ),
     ],
   });
-  tokenPricePlot.setAttribute("data-help", "This chart shows the token's AMM price moving between the Revnet's price ceiling and price floor.")
+  tokenPricePlot.setAttribute(
+    "data-help",
+    "This chart shows the token's AMM price moving between the Revnet's price ceiling and price floor."
+  );
 
   const revnetBalancesPlot = Plot.plot({
     title: "Revnet Balance and Token Supply",
@@ -625,7 +629,10 @@ function main() {
       ),
     ],
   });
-  revnetBalancesPlot.setAttribute("data-help", "The Revnet's current token supply and ETH balance over time.")
+  revnetBalancesPlot.setAttribute(
+    "data-help",
+    "The Revnet's current token supply and ETH balance over time."
+  );
 
   const liquidityPoolPlot = Plot.plot({
     title: "Liquidity Pool Balances",
@@ -689,7 +696,10 @@ function main() {
       ),
     ],
   });
-  liquidityPoolPlot.setAttribute("data-help", "The liquidity pool's ETH and token balances over time.")
+  liquidityPoolPlot.setAttribute(
+    "data-help",
+    "The liquidity pool's ETH and token balances over time."
+  );
 
   const boostPlot = Plot.plot({
     title: "Cumulative Tokens Sent to Boost",
@@ -725,7 +735,10 @@ function main() {
       }),
     ],
   });
-  boostPlot.setAttribute("data-help", "The cumulative number of tokens sent to the boost address, including the premint.")
+  boostPlot.setAttribute(
+    "data-help",
+    "The cumulative number of tokens sent to the boost address, including the premint."
+  );
 
   const purchases = simulationData.flatMap((v) =>
     v.dailyPurchases.map((p) => {
@@ -871,7 +884,10 @@ function main() {
       ),
     ],
   });
-  cumulativeVolumesPlot.setAttribute("data-help", "Totals for ETH/token spending and receiving across the Revnet and the liquidity pool.")
+  cumulativeVolumesPlot.setAttribute(
+    "data-help",
+    "Totals for ETH/token spending and receiving across the Revnet and the liquidity pool."
+  );
 
   const tokenReclaimAmountPlot = Plot.plot({
     title: "Price Floor Reclaim Values",
@@ -949,7 +965,10 @@ function main() {
       ),
     ],
   });
-  tokenReclaimAmountPlot.setAttribute("data-help", "The amount of ETH which can be reclaimed from the Revnet by destroying 1, 5, or 10 tokens at the price floor over time.")
+  tokenReclaimAmountPlot.setAttribute(
+    "data-help",
+    "The amount of ETH which can be reclaimed from the Revnet by destroying 1, 5, or 10 tokens at the price floor over time."
+  );
 
   const purchaseData = traders.filter((t) => t.purchase).map((t) => t.purchase);
 
@@ -976,7 +995,10 @@ function main() {
       }),
     ],
   });
-  purchasePlot.setAttribute("data-help", "Purchase amounts over time. Crosses were fulfilled by the Revnet, and circles were fulfilled by the liquidity pool.")
+  purchasePlot.setAttribute(
+    "data-help",
+    "Purchase amounts over time. Crosses were fulfilled by the Revnet, and circles were fulfilled by the liquidity pool."
+  );
 
   const saleData = traders
     .filter((t) => t.sale)
@@ -991,7 +1013,6 @@ function main() {
       tokensPurchased: t.purchase.revnetTokensReceived,
     }));
 
-  console.time("iterate");
   let avgReturn = 0,
     avgDaysHeld = 0,
     avgSaleSize = 0,
@@ -1020,7 +1041,6 @@ function main() {
   avgReturn /= saleCount;
   avgDaysHeld /= saleCount;
   avgSaleSize /= saleCount;
-  console.timeEnd("iterate");
 
   const salePlot = Plot.plot({
     title: "Sales",
@@ -1045,7 +1065,10 @@ function main() {
       }),
     ],
   });
-  salePlot.setAttribute("data-help", "Sale amounts over time. Crosses were fulfilled by the Revnet, and circles were fulfilled by the liquidity pool.")
+  salePlot.setAttribute(
+    "data-help",
+    "Sale amounts over time. Crosses were fulfilled by the Revnet, and circles were fulfilled by the liquidity pool."
+  );
 
   const profitabilityPlot = Plot.plot({
     title: "Days Held vs. Return",
@@ -1070,7 +1093,10 @@ function main() {
       }),
     ],
   });
-  profitabilityPlot.setAttribute("data-help", "The x axis reflects the number of days a trader held their tokens, and the y axis reflects their return from selling. Larger dots represent greater token balances. Colors correpond to the initial purchase date.");
+  profitabilityPlot.setAttribute(
+    "data-help",
+    "The x axis reflects the number of days a trader held their tokens, and the y axis reflects their return from selling. Larger dots represent greater token balances. Colors correpond to the initial purchase date."
+  );
 
   dashboard.innerHTML += html`<table>
     <tr>

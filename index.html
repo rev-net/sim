@@ -20,7 +20,7 @@
           value="1"
           step="1"
           min="0"
-          data-help="How frequently the price ceiling increases. The price ceiling is the price to create new tokens."
+          data-help="Price Ceiling Increase Frequency: How frequently the price ceiling increases. The price ceiling is the price to create new tokens."
         />
         <label for="priceCeilingIncreasePercentage"
           >Price Ceiling Increase Percentage</label
@@ -33,7 +33,7 @@
           min="0"
           max="1"
           oninput="updateSliderPercent(this)"
-          data-help="How much the price ceiling increases. The price ceiling is the price to create new tokens."
+          data-help="Price Ceiling Increase Percentage: How much the price ceiling increases. The price ceiling is the price to create new tokens."
         />
         <div class="slider-values">
           <span class="min-value">0%</span>
@@ -49,7 +49,7 @@
           min="0"
           max="1"
           oninput="updateSliderPercent(this)"
-          data-help="How much ETH stays in the Revnet when people reclaim ETH by destroying their tokens at the price floor. Higher taxes keep more ETH in the Revnet."
+          data-help="Price Floor Tax Intensity: How much ETH stays in the Revnet when people reclaim ETH by destroying their tokens at the price floor. Higher taxes keep more ETH in the Revnet."
         />
         <div class="slider-values">
           <span class="min-value">0%</span>
@@ -65,21 +65,21 @@
           min="0"
           max="1"
           oninput="updateSliderPercent(this)"
-          data-help="The percentage of token purchases to route to the Boost address while the Boost is active."
+          data-help="Boost Percent: The percentage of token purchases to route to the Boost address while the Boost is active."
         />
         <div class="slider-values">
           <span class="min-value">0%</span>
           <span class="current-value">10.0%</span>
           <span class="max-value">100%</span>
         </div>
-        <label for="boostDurationInDays">Boost Duration In Days</label>
+        <label for="boostDurationInDays">Boost Duration (Days)</label>
         <input
           type="number"
           id="boostDurationInDays"
           value="30"
           min="0"
           step="1"
-          data-help="The number of days to send tokens to the Boost address."
+          data-help="Boost Duration: The number of days to send tokens to the Boost address."
         />
         <label for="premintAmount">Premint Amount</label>
         <input
@@ -87,7 +87,7 @@
           id="premintAmount"
           value="5"
           min="0"
-          data-help="How many tokens to pre-mint to the Boost address."
+          data-help="Premint Amount: How many tokens to pre-mint to the Boost address."
         />
       </section>
       <section>
@@ -99,7 +99,7 @@
           min="0"
           step="1"
           value="0"
-          data-help="The day the liquidity pool is deployed. Before this day, all token purchases and sales will be fulfilled by the Revnet."
+          data-help="Pool Deploy Day: The day the liquidity pool is deployed. Before this day, all token purchases and sales will be fulfilled by the Revnet."
         />
         <label for="eth">Initial ETH in Pool</label>
         <input
@@ -107,7 +107,7 @@
           id="eth"
           value="0"
           min="0"
-          data-help="The amount of ETH the liquidity pool starts out with."
+          data-help="Initial ETH in Pool: The amount of ETH the liquidity pool starts out with."
         />
         <label for="revnetToken">Initial Tokens in Pool</label>
         <input
@@ -115,7 +115,7 @@
           id="revnetToken"
           value="0"
           min="0"
-          data-help="The number of tokens the liquidity pool starts out with."
+          data-help="Initial Tokens in Pool: The number of tokens the liquidity pool starts out with."
         />
         <label for="revnetTokenLiquidityRatio">Token Liquidity Ratio</label>
         <input
@@ -126,7 +126,7 @@
           min="0"
           max="1"
           oninput="updateSliderPercent(this)"
-          data-help="The percentage of tokens people provide to the liquidity pool after purchasing them."
+          data-help="Token Liquidity Ratio: The percentage of tokens people provide to the liquidity pool after purchasing them."
         />
         <div class="slider-values">
           <span class="min-value">0%</span>
@@ -142,7 +142,7 @@
           min="0"
           max="1"
           oninput="updateSliderPercent(this)"
-          data-help="The percentage of ETH people provide to the liquidity pool after selling their tokens."
+          data-help="ETH Liquidity Ratio: The percentage of ETH people provide to the liquidity pool after selling their tokens."
         />
         <div class="slider-values">
           <span class="min-value">0%</span>
@@ -159,7 +159,7 @@
           value="100"
           min="0"
           step="1"
-          data-help="The number of days to simulate."
+          data-help="Simulation Length: The number of days to simulate."
         />
         <label for="randomnessSeed">Randomness Seed</label>
         <input
@@ -167,7 +167,7 @@
           id="randomnessSeed"
           value="1"
           min="1"
-          data-help="A seed for the random number generators which dictate token purchases and sales."
+          data-help="Randomness Seed: A seed for the random number generators which dictate token purchases and sales."
         />
         <label for="dailyPurchasesLambda"
           >Average Number of Purchases Per Day</label
@@ -178,14 +178,14 @@
           value="5"
           min="0"
           step="1"
-          data-help="The lambda of the poisson function which dictates how many purchases happen each day."
+          data-help="Average Number of Purchases: The lambda of the poisson function which dictates how many purchases happen each day."
         />
         <label for="purchaseAmountMean">Purchase Size Mean</label>
         <input
           type="number"
           id="purchaseAmountMean"
           value="0"
-          data-help="The mean (mu) of the lognorm distribution which dictates purchase sizes."
+          data-help="Purchase Size Mean: The mean (mu) of the lognorm distribution which dictates purchase sizes."
         />
         <label for="purchaseAmountDeviation">Purchase Size Deviation</label>
         <input
@@ -193,7 +193,7 @@
           id="purchaseAmountDeviation"
           value="1.5"
           step="0.1"
-          data-help="The deviance (sigma) of the lognorm distribution which dictates purchase sizes."
+          data-help="Purchase Size Deviation: The deviation (sigma) of the lognorm distribution which dictates purchase sizes."
         />
         <label for="minimumDaysHeld">Minimum Days to Hold Tokens</label>
         <input
@@ -202,7 +202,7 @@
           value="10"
           min="0"
           step="1"
-          data-help="The minimum number of days a trader will hold their tokens before selling them."
+          data-help="Minimum Days to Hold Tokens: The minimum number of days a trader will hold their tokens before selling them."
         />
         <label for="saleProbability">Daily Sale Probability</label>
         <input
@@ -213,7 +213,7 @@
           min="0"
           max="1"
           oninput="updateSliderPercent(this)"
-          data-help="The likelihood any given trader will sell their tokens in a day."
+          data-help="Daily Sale Probability: The likelihood any given trader will sell their tokens in a day."
         />
         <div class="slider-values">
           <span class="min-value">0%</span>
