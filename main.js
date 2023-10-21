@@ -33,8 +33,6 @@ const plotStyles = {
 
 /**
  * TODO:
- * Traders should withdraw liquidity eventually (sale is simple. how for purchase?)
- * JSON-encode parameters. Download and upload settings. URL-encoded base64 as well.
  * "Intelligent" LPs.
  */
 
