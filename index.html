@@ -149,10 +149,10 @@
           <span class="current-value">10.0%</span>
           <span class="max-value">100%</span>
         </div>
-        <label for="liquidityPoolFee">Fee</label>
+        <label for="fee">Fee</label>
         <input
           type="range"
-          id="liquidityPoolFee"
+          id="fee"
           value="0.01"
           step="0.001"
           min="0"
@@ -236,12 +236,20 @@
           <span class="current-value">1.0%</span>
           <span class="max-value">100%</span>
         </div>
+      </section>
+      <section>
+        <h2>Miscellaneous</h2>
         <button
           onclick="resetInputs()"
           data-help="Reset All Inputs: Set all parameters to their initial values."
         >
           Reset All Inputs
         </button>
+        <button onclick="exportSettings()">Export Settings</button>
+        <button onclick="importSettings()">
+          Import Settings (Upload Below)
+        </button>
+        <input type="file" id="settingsUpload" accept=".json" />
       </section>
     </div>
     <div id="dashboard"></div>
@@ -252,12 +260,17 @@
         currentValueSpan.textContent = `${(slider.value * 100).toFixed(1)}%`;
       }
 
+      const renderEvent = new CustomEvent("render", {
+        bubbles: true,
+      });
+
       function resetInputs() {
         const inputs = document.querySelectorAll("input");
         inputs.forEach((i) => {
           i.value = i.defaultValue;
           if (i.type === "range") updateSliderPercent(i);
         });
+        document.dispatchEvent(renderEvent);
       }
 
       const helpTextElements = document.querySelectorAll("[data-help]");
@@ -271,6 +284,77 @@
           helpBar.style.display = "none";
         });
       });
+
+      function exportSettings() {
+        const ids = [
+          "priceCeilingIncreasePercentage",
+          "priceCeilingIncreaseFrequencyInDays",
+          "priceFloorTaxIntensity",
+          "premintAmount",
+          "boostPercent",
+          "boostDurationInDays",
+          "eth",
+          "revnetToken",
+          "dayDeployed",
+          "fee",
+          "daysToCalculate",
+          "randomnessSeed",
+          "dailyPurchasesLambda",
+          "purchaseAmountMean",
+          "purchaseAmountDeviation",
+          "revnetTokenLiquidityRatio",
+          "ethLiquidityRatio",
+          "saleProbability",
+          "minimumDaysHeld",
+        ];
+        const jsonString = JSON.stringify(
+          ids.reduce((obj, id) => {
+            obj[id] = Number(document.getElementById(id).value);
+            return obj;
+          }, {}),
+          null,
+          4
+        );
+        const blob = new Blob([jsonString], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const downloadElem = document.createElement("a");
+        downloadElem.href = url;
+        downloadElem.download = "revnet.json";
+        document.body.appendChild(downloadElem);
+        downloadElem.click();
+        document.body.removeChild(downloadElem);
+      }
+
+      function importSettings() {
+        const fileInput = document.getElementById("settingsUpload");
+        const file = fileInput.files[0];
+
+        if (!file) {
+          alert('Upload a .json file by clicking "Choose File"');
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          try {
+            const data = JSON.parse(event.target.result);
+            for (let key in data) {
+              let input = document.getElementById(key);
+              if (input && input.tagName === "INPUT") {
+                input.value = data[key];
+                if (input.type === "range") updateSliderPercent(input);
+              }
+            }
+            document.dispatchEvent(renderEvent);
+          } catch (e) {
+            alert(`Could not parse JSON: ${e}`);
+          }
+        };
+        reader.onerror = function () {
+          alert("Error reading the file.");
+        };
+        reader.readAsText(file);
+      }
     </script>
     <script type="module" src="/main.js"></script>
   </body>

@@ -35,9 +35,7 @@ const plotStyles = {
  * TODO:
  * Traders should withdraw liquidity eventually (sale is simple. how for purchase?)
  * JSON-encode parameters. Download and upload settings. URL-encoded base64 as well.
- * Price floor per token destroyed chart.
  * "Intelligent" LPs.
- * Liquidity fee.
  */
 
 /*********************************************
@@ -74,6 +72,18 @@ function normalRandomNumber(rand) {
 
 function logNormRandomNumber(mu, sigma, rand) {
   return Math.exp(sigma * normalRandomNumber(rand) + mu);
+}
+
+/**
+ * Converts an array of ids into an object where each id is a key and the value is the numerical value of the element with that id.
+ * @param {Array} ids - An array of ids to be converted into an object.
+ * @returns {Object} An object where each key is an id and the value is the numerical value of the element with that id.
+ */
+function objectify(ids) {
+  return ids.reduce((obj, id) => {
+    obj[id] = Number(document.getElementById(id).value);
+    return obj;
+  }, {});
 }
 
 /*********************************************
@@ -122,7 +132,7 @@ class Pool {
   getMarginalPriceOfRevnetToken() {
     return this.eth / this.revnetToken;
   }
-  
+
   /**
    * Calculate the amount of ETH the pool would need to have to fulfill a purchase spending a given amount of Revnet tokens.
    * @param {number} revnetTokenAmount - The amount of Revnet tokens.
@@ -132,8 +142,7 @@ class Pool {
     const invariant = this.eth * this.revnetToken;
     const newRevnetTokenBalance = this.revnetToken + revnetTokenAmount;
     const newEthBalance = invariant / newRevnetTokenBalance;
-    return (this.eth - newEthBalance);
-    
+    return this.eth - newEthBalance;
   }
 
   /**
@@ -147,7 +156,7 @@ class Pool {
     const newEthBalance = invariant / newRevnetTokenBalance;
     return (this.eth - newEthBalance) * (1 - this.fee);
   }
-  
+
   /**
    * Calculate the amount of Revnet tokens the pool would need to have to fulfill a purchase spending a given amount of ETH.
    * @param {number} ethAmount - The amount of ETH.
@@ -157,7 +166,7 @@ class Pool {
     const invariant = this.eth * this.revnetToken;
     const newEthBalance = this.eth + ethAmount;
     const newRevnetTokenBalance = invariant / newEthBalance;
-    return (this.revnetToken - newRevnetTokenBalance);
+    return this.revnetToken - newRevnetTokenBalance;
   }
 
   /**
@@ -356,11 +365,13 @@ class Simulator {
     if (
       this.day >= this.pool.dayDeployed &&
       this.pool.revnetToken > this.pool.getRevnetTokenReturnPlusFee(ethSpent) &&
-      this.pool.getRevnetTokenReturn(ethSpent) > this.revnet.getTokensCreatedPerEth(this.day) * ethSpent
+      this.pool.getRevnetTokenReturn(ethSpent) >
+        this.revnet.getTokensCreatedPerEth(this.day) * ethSpent
     ) {
       revnetTokensReceived = this.pool.buyRevnetTokens(ethSpent);
       if (this.day < this.revnet.boostDurationInDays) {
-        const tokensToSendToBoost = revnetTokensReceived * this.revnet.boostPercent;
+        const tokensToSendToBoost =
+          revnetTokensReceived * this.revnet.boostPercent;
         this.revnet.tokensSentToBoost += tokensToSendToBoost;
         revnetTokensReceived -= tokensToSendToBoost;
       }
@@ -385,8 +396,7 @@ class Simulator {
       ethReceived = 0;
     if (
       this.day >= this.pool.dayDeployed &&
-      this.pool.eth >
-        this.pool.getEthReturnPlusFee(revnetTokensSpent) &&
+      this.pool.eth > this.pool.getEthReturnPlusFee(revnetTokensSpent) &&
       this.pool.getEthReturn(revnetTokensSpent) >
         this.revnet.getEthReclaimAmount(revnetTokensSpent)
     ) {
@@ -465,8 +475,10 @@ class Simulator {
         poolRevnetTokenBalance: this.pool.revnetToken,
         poolRevnetTokenPrice: this.pool.getMarginalPriceOfRevnetToken(),
         oneTokenReclaimAmount: this.revnet.getEthReclaimAmount(1),
-        fiveTokenReclaimAmount: this.revnet.getEthReclaimAmount(5),
-        tenTokenReclaimAmount: this.revnet.getEthReclaimAmount(10),
+        hundredTokenReclaimAmountPerToken:
+          this.revnet.getEthReclaimAmount(100) / 100,
+        fiveHundredTokenReclaimAmountPerToken:
+          this.revnet.getEthReclaimAmount(500) / 500,
         ethFeesAccumulated: this.pool.ethFeesAccumulated,
         revnetTokenFeesAccumulated: this.pool.revnetTokenFeesAccumulated,
         dailyPurchases,
@@ -479,55 +491,31 @@ class Simulator {
 /*********************************************
  * SECTION 4: RUNTIME
  *********************************************/
+
 function runSimulation() {
-  const revnetParams = {
-    priceCeilingIncreasePercentage: Number(
-      document.getElementById("priceCeilingIncreasePercentage").value
-    ),
-    priceCeilingIncreaseFrequencyInDays: Number(
-      document.getElementById("priceCeilingIncreaseFrequencyInDays").value
-    ),
-    priceFloorTaxIntensity: Number(
-      document.getElementById("priceFloorTaxIntensity").value
-    ),
-    premintAmount: Number(document.getElementById("premintAmount").value),
-    boostPercent: Number(document.getElementById("boostPercent").value),
-    boostDurationInDays: Number(
-      document.getElementById("boostDurationInDays").value
-    ),
-  };
+  const revnetParams = objectify([
+    "priceCeilingIncreasePercentage",
+    "priceCeilingIncreaseFrequencyInDays",
+    "priceFloorTaxIntensity",
+    "premintAmount",
+    "boostPercent",
+    "boostDurationInDays",
+  ]);
+  const poolParams = objectify(["eth", "revnetToken", "dayDeployed", "fee"]);
+  const simParams = objectify([
+    "daysToCalculate",
+    "randomnessSeed",
+    "dailyPurchasesLambda",
+    "purchaseAmountMean",
+    "purchaseAmountDeviation",
+    "revnetTokenLiquidityRatio",
+    "ethLiquidityRatio",
+    "saleProbability",
+    "minimumDaysHeld",
+  ]);
 
-  const poolParams = {
-    eth: Number(document.getElementById("eth").value),
-    revnetToken: Number(document.getElementById("revnetToken").value),
-    dayDeployed: Number(document.getElementById("dayDeployed").value),
-    fee: Number(document.getElementById("liquidityPoolFee").value),
-  };
-
-  const simParams = {
-    daysToCalculate: Number(document.getElementById("daysToCalculate").value),
-    randomnessSeed: Number(document.getElementById("randomnessSeed").value),
-    dailyPurchasesLambda: Number(
-      document.getElementById("dailyPurchasesLambda").value
-    ),
-    purchaseAmountMean: Number(
-      document.getElementById("purchaseAmountMean").value
-    ),
-    purchaseAmountDeviation: Number(
-      document.getElementById("purchaseAmountDeviation").value
-    ),
-    revnetTokenLiquidityRatio: Number(
-      document.getElementById("revnetTokenLiquidityRatio").value
-    ),
-    ethLiquidityRatio: Number(
-      document.getElementById("ethLiquidityRatio").value
-    ),
-    saleProbability: Number(document.getElementById("saleProbability").value),
-    minimumDaysHeld: Number(document.getElementById("minimumDaysHeld").value),
-  };
-  
-  const simulator = new Simulator(revnetParams, poolParams, simParams)
-  simulator.simulate()
+  const simulator = new Simulator(revnetParams, poolParams, simParams);
+  simulator.simulate();
 
   return [simulator.simulationResults, simulator.traders];
 }
@@ -962,7 +950,8 @@ function render() {
   );
 
   const tokenReclaimAmountPlot = Plot.plot({
-    title: "Price Floor Reclaim Values",
+    title:
+      "Reclaimable ETH Per Token at Price Floor for Different Token Amounts",
     style: plotStyles,
     x: { label: "Day" },
     y: { label: "ETH (Ξ)", grid: true },
@@ -982,8 +971,12 @@ function render() {
             [
               `Day: ${d.day}`,
               `1 Token -> ${d.oneTokenReclaimAmount.toFixed(2)}Ξ`,
-              `5 Tokens -> ${d.fiveTokenReclaimAmount.toFixed(2)}Ξ`,
-              `10 Tokens -> ${d.tenTokenReclaimAmount.toFixed(2)}Ξ`,
+              `100 Tokens -> ${d.hundredTokenReclaimAmountPerToken.toFixed(
+                2
+              )}Ξ`,
+              `500 Tokens -> ${d.fiveHundredTokenReclaimAmountPerToken.toFixed(
+                2
+              )}Ξ`,
             ].join("    "),
         })
       ),
@@ -1005,41 +998,41 @@ function render() {
       ),
       Plot.line(simulationData, {
         x: "day",
-        y: "fiveTokenReclaimAmount",
+        y: "hundredTokenReclaimAmountPerToken",
         stroke: solar.violet,
       }),
       Plot.text(
         simulationData,
         Plot.selectLast({
           x: "day",
-          y: "fiveTokenReclaimAmount",
+          y: "hundredTokenReclaimAmountPerToken",
           fill: solar.violet,
           dx: 3,
           textAnchor: "start",
-          text: () => "5 Tokens",
+          text: () => "100 Tokens",
         })
       ),
       Plot.line(simulationData, {
         x: "day",
-        y: "tenTokenReclaimAmount",
+        y: "fiveHundredTokenReclaimAmountPerToken",
         stroke: solar.cyan,
       }),
       Plot.text(
         simulationData,
         Plot.selectLast({
           x: "day",
-          y: "tenTokenReclaimAmount",
+          y: "fiveHundredTokenReclaimAmountPerToken",
           fill: solar.cyan,
           dx: 3,
           textAnchor: "start",
-          text: () => "10 Tokens",
+          text: () => "500 Tokens",
         })
       ),
     ],
   });
   tokenReclaimAmountPlot.setAttribute(
     "data-help",
-    "The amount of ETH which can be reclaimed from the Revnet by destroying 1, 5, or 10 tokens at the price floor over time."
+    "The more tokens you destroy to reclaim ETH, the more ETH you get per token. This chart shows the ETH a reclaimer would receive per token when destroying different amounts of tokens at the price floor."
   );
 
   const accumulatedFeesPlot = Plot.plot({
@@ -1290,10 +1283,10 @@ function render() {
     revnetBalancesPlot,
     liquidityPoolPlot,
     cumulativeVolumesPlot,
-    tokenReclaimAmountPlot,
+    accumulatedFeesPlot,
     purchasePlot,
     salePlot,
-    accumulatedFeesPlot,
+    tokenReclaimAmountPlot,
     boostPlot,
   ].forEach((p) => {
     dashboard.appendChild(p);
@@ -1315,3 +1308,5 @@ render();
 document
   .querySelectorAll("input")
   .forEach((i) => i.addEventListener("input", render));
+
+document.addEventListener("render", render);

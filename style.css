@@ -116,3 +116,9 @@ button {
   padding: 5px;
   margin-top: 10px;
 }
+
+input[type="file"] {
+  background-color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+}
