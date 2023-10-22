@@ -1150,6 +1150,7 @@ function render() {
     avgSaleSize = 0,
     salesThroughRevnet = 0,
     saleCount = 0,
+    profitableSales = 0,
     purchasesThroughRevnet = 0,
     avgPurchaseSize = 0,
     purchaseCount = 0;
@@ -1162,7 +1163,9 @@ function render() {
 
     if (trader.sale) {
       saleCount++;
-      avgReturn += trader.sale.ethReceived - trader.purchase.ethSpent;
+      const saleReturn = trader.sale.ethReceived - trader.purchase.ethSpent;
+      if (saleReturn > 0) profitableSales++;
+      avgReturn += saleReturn;
       avgDaysHeld += trader.sale.day - trader.purchase.day;
       avgSaleSize += trader.sale.ethReceived;
       if (trader.sale.source === "revnet") salesThroughRevnet++;
@@ -1173,6 +1176,7 @@ function render() {
   avgReturn /= saleCount;
   avgDaysHeld /= saleCount;
   avgSaleSize /= saleCount;
+  profitableSales /= saleCount;
 
   const salePlot = Plot.plot({
     title: "Sales",
@@ -1238,6 +1242,10 @@ function render() {
     <tr>
       <td>Average Return</td>
       <td>${avgReturn > 0 ? "+" : ""}${avgReturn.toFixed(2)}Ξ</td>
+    </tr>
+    <tr>
+      <td>Percent Which Profited</td>
+      <td>${(100 * profitableSales).toFixed(2)}%</td>
     </tr>
     <tr>
       <td>Purchase Count</td>
