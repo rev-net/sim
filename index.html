@@ -20,7 +20,7 @@
       <section>
         <h2>Revnet</h2>
         <label for="priceCeilingIncreaseFrequencyInDays"
-          >Price Ceiling Increase Frequency (Days)</label
+          >Price Ceiling – Increase Frequency (Days)</label
         >
         <input
           type="number"
@@ -28,10 +28,10 @@
           value="1"
           step="1"
           min="0"
-          data-help="Price Ceiling Increase Frequency: How frequently the price ceiling increases. The price ceiling is the price to create new tokens."
+          data-help="Increase Frequency: How long it takes for the price ceiling to increase. The price ceiling is the price to create new tokens."
         />
         <label for="priceCeilingIncreasePercentage"
-          >Price Ceiling Increase Percentage</label
+          >Price Ceiling – Increase Percentage</label
         >
         <input
           type="range"
@@ -41,14 +41,14 @@
           min="0"
           max="1"
           oninput="updateSliderPercent(this)"
-          data-help="Price Ceiling Increase Percentage: How much the price ceiling increases. The price ceiling is the price to create new tokens."
+          data-help="Increase Percentage: How much the price ceiling increases. The price ceiling is the price to create new tokens."
         />
         <div class="slider-values">
           <span class="min-value">0%</span>
           <span class="current-value">2.0%</span>
           <span class="max-value">100%</span>
         </div>
-        <label for="priceFloorTaxIntensity">Price Floor Tax Intensity</label>
+        <label for="priceFloorTaxIntensity">Price Floor – Tax Intensity</label>
         <input
           type="range"
           id="priceFloorTaxIntensity"
@@ -57,14 +57,14 @@
           min="0"
           max="1"
           oninput="updateSliderPercent(this)"
-          data-help="Price Floor Tax Intensity: How much ETH stays in the Revnet when people reclaim ETH by destroying their tokens at the price floor. Higher taxes keep more ETH in the Revnet."
+          data-help="Tax Intensity: How much ETH stays in the revnet when people destroy their tokens to get back ETH. Higher taxes keep more ETH in the revnet."
         />
         <div class="slider-values">
           <span class="min-value">0%</span>
           <span class="current-value">33.0%</span>
           <span class="max-value">100%</span>
         </div>
-        <label for="boostPercent">Boost Percent</label>
+        <label for="boostPercent">Boost – Percent</label>
         <input
           type="range"
           id="boostPercent"
@@ -73,41 +73,41 @@
           min="0"
           max="1"
           oninput="updateSliderPercent(this)"
-          data-help="Boost Percent: The percentage of token purchases to route to the Boost address while the Boost is active."
+          data-help="Percent: The percentage of purchased tokens to send to the boost operator."
         />
         <div class="slider-values">
           <span class="min-value">0%</span>
           <span class="current-value">10.0%</span>
           <span class="max-value">100%</span>
         </div>
-        <label for="boostDurationInDays">Boost Duration (Days)</label>
+        <label for="boostDurationInDays">Boost – Duration (Days)</label>
         <input
           type="number"
           id="boostDurationInDays"
           value="30"
           min="0"
           step="1"
-          data-help="Boost Duration: The number of days to send tokens to the Boost address."
+          data-help="Duration: How long the boost lasts."
         />
-        <label for="premintAmount">Premint Amount</label>
+        <label for="premintAmount">Boost – Premint Amount</label>
         <input
           type="number"
           id="premintAmount"
           value="5"
           min="0"
-          data-help="Premint Amount: How many tokens to pre-mint to the Boost address."
+          data-help="Premint Amount: How many tokens to pre-mint to the boost operator."
         />
       </section>
       <section>
         <h2>Liquidity Pool</h2>
-        <label for="dayDeployed">Pool Deploy Day</label>
+        <label for="dayDeployed">Deploy Day</label>
         <input
           type="number"
           id="dayDeployed"
           min="0"
           step="1"
           value="0"
-          data-help="Pool Deploy Day: The day the liquidity pool is deployed. Before this day, all token purchases and sales will be fulfilled by the Revnet."
+          data-help="Deploy Day: The day the liquidity pool is deployed. Before this day, token purchases and sales go through the revnet."
         />
         <label for="eth">Initial ETH in Pool</label>
         <input
@@ -185,31 +185,29 @@
           step="1"
           data-help="Simulation Length: The number of days to simulate."
         />
-        <label for="randomnessSeed">Randomness Seed</label>
+        <label for="randomnessSeed">Seed</label>
         <input
           type="number"
           id="randomnessSeed"
           value="1"
           min="1"
-          data-help="Randomness Seed: A seed for the random number generators which dictate token purchases and sales."
+          data-help="Seed: A seed for the random number generators used for token purchases and sales."
         />
-        <label for="dailyPurchasesLambda"
-          >Average Number of Purchases Per Day</label
-        >
+        <label for="dailyPurchasesLambda">Average Purchases Per Day</label>
         <input
           type="number"
           id="dailyPurchasesLambda"
           value="5"
           min="0"
           step="1"
-          data-help="Average Number of Purchases: The lambda of the poisson function which dictates how many purchases happen each day."
+          data-help="Average Purchases Per Day: The typical number of purchases per day. This is a lambda of a poisson function."
         />
         <label for="purchaseAmountMean">Purchase Size Mean</label>
         <input
           type="number"
           id="purchaseAmountMean"
           value="0"
-          data-help="Purchase Size Mean: The mean (mu) of the lognorm distribution which dictates purchase sizes."
+          data-help="Purchase Size Mean: The lognorm mean purchase size. This is the mu of a lognorm distribution."
         />
         <label for="purchaseAmountDeviation">Purchase Size Deviation</label>
         <input
@@ -217,7 +215,7 @@
           id="purchaseAmountDeviation"
           value="1.5"
           step="0.1"
-          data-help="Purchase Size Deviation: The deviation (sigma) of the lognorm distribution which dictates purchase sizes."
+          data-help="Purchase Size Deviation: The lognorm deviation of purchase sizes. This is the sigma of a lognorm distribution."
         />
         <label for="minimumDaysHeld">Minimum Days to Hold Tokens</label>
         <input
@@ -226,7 +224,7 @@
           value="10"
           min="0"
           step="1"
-          data-help="Minimum Days to Hold Tokens: The minimum number of days a trader will hold their tokens before selling them."
+          data-help="Minimum Days to Hold Tokens: The minimum number of days a trader must hold their tokens before selling them."
         />
         <label for="saleProbability">Daily Sale Probability</label>
         <input
@@ -249,15 +247,28 @@
         <h2>Miscellaneous</h2>
         <button
           onclick="resetInputs()"
-          data-help="Reset All Inputs: Set all parameters to their initial values."
+          data-help="Reset All Inputs: Set all settings to their default values."
         >
           Reset All Inputs
         </button>
-        <button onclick="exportSettings()">Export Settings</button>
-        <button onclick="importSettings()">
-          Import Settings (Upload Below)
+        <button
+          onclick="exportSettings()"
+          data-help="Export Settings: Download a .json file containing the current simulation settings."
+        >
+          Export Settings
         </button>
-        <input type="file" id="settingsUpload" accept=".json" />
+        <button
+          onclick="importSettings()"
+          data-help="Apply Settings: Apply the settings from a .json file uploaded below."
+        >
+          Apply Settings (Upload Below)
+        </button>
+        <input
+          type="file"
+          id="settingsUpload"
+          accept=".json"
+          data-help="Upload a settings .json file here."
+        />
       </section>
     </div>
     <div id="dashboard"></div>
