@@ -1145,19 +1145,25 @@ function render() {
       tokensPurchased: t.purchase.revnetTokensReceived,
     }));
 
+  const medianReturnArray = saleData.map((s) => s.profit).sort((a, b) => a - b);
+  const medianReturn =
+    medianReturnArray.length % 2 === 0
+      ? (medianReturnArray[medianReturnArray.length / 2 - 1] +
+          medianReturnArray[medianReturnArray.length / 2]) /
+        2
+      : medianReturnArray[Math.floor(medianReturnArray.length / 2)];
+  console.log("medianReturn", medianReturn);
+
   let avgReturn = 0,
     avgDaysHeld = 0,
-    avgSaleSize = 0,
     salesThroughRevnet = 0,
     saleCount = 0,
     profitableSales = 0,
     purchasesThroughRevnet = 0,
-    avgPurchaseSize = 0,
     purchaseCount = 0;
   for (let trader of traders) {
     if (trader.purchase) {
       if (trader.purchase.source === "revnet") purchasesThroughRevnet++;
-      avgPurchaseSize += trader.purchase.ethSpent;
       purchaseCount++;
     }
 
@@ -1167,15 +1173,12 @@ function render() {
       if (saleReturn > 0) profitableSales++;
       avgReturn += saleReturn;
       avgDaysHeld += trader.sale.day - trader.purchase.day;
-      avgSaleSize += trader.sale.ethReceived;
       if (trader.sale.source === "revnet") salesThroughRevnet++;
     }
   }
-  avgPurchaseSize /= purchaseCount;
 
   avgReturn /= saleCount;
   avgDaysHeld /= saleCount;
-  avgSaleSize /= saleCount;
   profitableSales /= saleCount;
 
   const salePlot = Plot.plot({
@@ -1244,12 +1247,24 @@ function render() {
       <td>${avgReturn > 0 ? "+" : ""}${avgReturn.toFixed(2)}Ξ</td>
     </tr>
     <tr>
+      <td>Median Return</td>
+      <td>${medianReturn > 0 ? "+" : ""}${medianReturn.toFixed(2)}Ξ</td>
+    </tr>
+    <tr>
       <td>Percent Which Profited</td>
       <td>${(100 * profitableSales).toFixed(2)}%</td>
     </tr>
     <tr>
+      <td>Average Days Held</td>
+      <td>${avgDaysHeld.toFixed(2)}</td>
+    </tr>
+    <tr>
       <td>Purchase Count</td>
       <td>${purchaseCount}</td>
+    </tr>
+    <tr>
+      <td>Sale Count</td>
+      <td>${saleCount}</td>
     </tr>
     <tr>
       <td>Purchases via Revnet</td>
@@ -1259,27 +1274,11 @@ function render() {
       </td>
     </tr>
     <tr>
-      <td>Average Purchase Size</td>
-      <td>${avgPurchaseSize.toFixed(2)}Ξ</td>
-    </tr>
-    <tr>
-      <td>Sale Count</td>
-      <td>${saleCount}</td>
-    </tr>
-    <tr>
       <td>Sales via Revnet</td>
       <td>
         ${salesThroughRevnet}
         (${((100 * salesThroughRevnet) / saleCount).toFixed(2)}%)
       </td>
-    </tr>
-    <tr>
-      <td>Average Sale Size</td>
-      <td>${avgSaleSize.toFixed(2)}Ξ</td>
-    </tr>
-    <tr>
-      <td>Average Days Held</td>
-      <td>${avgDaysHeld.toFixed(2)}</td>
     </tr>
   </table>`;
 
