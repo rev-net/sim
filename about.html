@@ -17,10 +17,78 @@
       <ul>
         <li><a href="/">Home</a></li>
         <li><a href="/about.html">About</a></li>
+        <li><a href="https://t.me/revnet_eth">Community</a></li>
+        <li><a href="https://www.revnet.app/">Make a Revnet</a></li>
       </ul>
     </nav>
-    <h1>What are Revnets?</h1>
-    <i>Adapted from <a href="https://revnet.eth.limo/">revnet.eth.limo</a>.</i>
+    <h1>About Revnets</h1>
+    <h2>Mechanism</h2>
+    <p>
+      <i>How do revnets work?<sup>1</sup></i>
+    </p>
+    <p>
+      Each revnet issues its own token and accepts a currency, chosen when the
+      revnet is created. Revnets don't have owners, and their rules are can't be
+      changed. To make things simpler, let's imagine ExampleNet, a revnet which
+      issues its own EXMP token and accepts ETH.<sup>2</sup>
+    </p>
+    <p>
+      Anyone can pay ExampleNet with ETH to create EXMP. The price to create
+      EXMP is the <strong>price ceiling</strong>. It costs 1 ETH to create 1
+      EXMP at first, but EXMP will get more expensive over time, depending on
+      ExampleNet's increase frequency (how often the price ceiling increases)
+      and its increase amount (how much the price ceiling increases).
+    </p>
+    <p>
+      Anyone can destroy their EXMP to get back some ETH from ExampleNet. The
+      amount of ETH you can get back by destroying EXMP is the
+      <strong>price floor</strong>, which is based on your portion of the total
+      EXMP supply and the amount of ETH in ExampleNet. ExampleNet can also have
+      a price floor tax which keeps some of the ETH which would be reclaimed in
+      ExampleNet, raising the price floor for future reclaimers. The price floor
+      also increases as people buy EXMP over time (because it gets more
+      expensive).
+    </p>
+    <p>
+      This is why Revnets are 'up-only' – as long as network activity continues,
+      the price floor should continue to rise.
+    </p>
+    <p>
+      ExampleNet will issue EXMP at the price ceiling until a Uniswap pool forms
+      between EXMP and ETH. From that point onwards, while EXMP's Uniswap pool
+      price is between the price ceiling and price floor, EXMP will be purchased
+      and sold in that pool. If the EXMP price reaches the price ceiling or
+      price floor, the EXMP supply will expand or contract to meet market
+      demand.
+    </p>
+    <p>
+      ExampleNet can also set up a <strong>boost</strong> which sends a some
+      EXMP to a wallet address (the boost operator) for some time after
+      ExampleNet's creation.
+    </p>
+    <p>
+      ExampleNet can pre-mint some EXMP to the boost operator when ExampleNet is
+      created. The boost operator could be a core team or developer multisig,
+      but it could also be a staking rewards contract, an airdrop stockpile, or
+      something else.
+    </p>
+    <p>
+      <sup>1</sup>See the
+      <a
+        href="https://raw.githubusercontent.com/rev-net/whitepaper/master/whitepaper/revnet.pdf"
+        >yellow paper</a
+      >
+      to learn more.
+    </p>
+    <p>
+      <sup>2</sup>Revnets can accept and denominate prices in other currencies.
+    </p>
+    <hr />
+    <h2>Pitch</h2>
+    <i
+      >Why use revnets? Adapted from
+      <a href="https://revnet.eth.limo/">revnet.eth.limo</a>.</i
+    >
     <p>
       <b>Revnets</b> are revenue-backed up-only networks, great for funding and
       sustaining open source projects and internet networks.
@@ -187,61 +255,6 @@
       address the long-standing monetization dilemma in open source, built
       specifically as an attractive model for networks of investors, builders,
       and fee-paying consumers alike.
-    </p>
-    <hr />
-    <h2>Mechanism</h2>
-    <p>
-      Each Revnet issues its own token and accepts a specific currency, chosen
-      when the revnet is created. Once a Revnet is created, all of its
-      parameters are locked in place. To make things simpler, let's imagine
-      ExampleNet, a revnet which accepts ETH and issues EXMP, an example
-      token.<sup>1</sup>
-    </p>
-    <p>
-      Anyone can pay ExampleNet with ETH to create EXMP. The ETH price to create
-      EXMP is the <strong>price ceiling</strong>. It costs 1 ETH to create 1
-      EXMP at first, but EXMP gets more expensive over time, according to
-      ExampleNet's increase frequency (how often the price ceiling increases)
-      and its increase amount (how much the price ceiling increases).
-    </p>
-    <p>
-      Anyone can destroy their EXMP to reclaim some ETH from ExampleNet. The
-      amount of ETH you can get back by destroying EXMP is the
-      <strong>price floor</strong>. The price floor is calculated based on your
-      portion of the total EXMP supply and the amount of ETH in ExampleNet.
-      ExampleNet can also have a price floor tax which keeps some of the ETH
-      which would be reclaimed in ExampleNet, raising the price floor. The price
-      floor <i>also</i> increases when people pay ExampleNet over generations.
-    </p>
-    <p>
-      This is why Revnets are 'up-only' – as long as network activity continues,
-      the price floor should continue to rise.
-    </p>
-    <p>
-      ExampleNet will issue EXMP at the price ceiling until a Uniswap pool forms
-      between EXMP and ETH. From that point onwards, while EXMP's Uniswap pool
-      price is between the price ceiling and price floor, EXMP will be purchased
-      and sold in that pool. If the EXMP price reaches the price ceiling or
-      price floor, the EXMP supply will expand or contract to meet market
-      demand.
-    </p>
-    <p>
-      ExampleNet can also set up a <strong>boost</strong> which sends a
-      percentage of EXMP to a specific address (the boost operator) for a period
-      of time after ExampleNet's creation. For example, a 20% boost which lasts
-      100 days would send 20% of EXMP token purchases to the boost operator, but
-      would stop sending these tokens after 100 days.
-    </p>
-    <p>
-      ExampleNet can also pre-mint EXMP to the boost operator when ExampleNet is
-      created. The boost operator could be a core team or developer multisig,
-      but it could also be a staking rewards contract, an airdrop stockpile, or
-      something else.
-    </p>
-
-    <!-- Footnotes -->
-    <p id="footnote1">
-      <sup>1</sup>Revnets can accept and denominate prices in other currencies.
     </p>
   </body>
 </html>
