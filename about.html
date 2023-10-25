@@ -10,6 +10,9 @@
         max-width: 600px;
         margin: auto;
       }
+      li {
+        margin-bottom: 1em;
+      }
     </style>
   </head>
   <body>
@@ -22,14 +25,93 @@
       </ul>
     </nav>
     <h1>About Revnets</h1>
-    <h2>Mechanism</h2>
+
     <p>
-      <i>How do revnets work?<sup>1</sup></i>
+      Let's say you want to build an open-source alternative to Google Maps.
+      Unless you want to build it by yourself, you'll need some type of
+      organization.
+    </p>
+    <ul>
+      <li>
+        Something like an LLC or a C corporation could work, but you would have
+        to deal with legal fees, paperwork, and management. These structures
+        make sense for working with shareholders and maximizing profits, but
+        that isn't your goal.
+      </li>
+      <li>
+        You could set up something more experimental like a DAO, but this comes
+        with its own burdens – you have to figure out governance and onchain
+        logistics to even get things off the ground, and DAOs have risks like
+        governance takeovers that you don't want to deal with.
+      </li>
+      <li>
+        You could try to make things work without a formal organization, but a
+        lack of pre-determined rules and boundaries can lead to disputes later
+        on.
+      </li>
+    </ul>
+    <p>
+      Even if one of these options <em>did</em> work, how would you attract and
+      grow a network of users to write reviews and label addresses?
     </p>
     <p>
-      Each revnet issues its own token and accepts a currency, chosen when the
-      revnet is created. Revnets don't have owners, and their rules are can't be
-      changed. To make things simpler, let's imagine ExampleNet, a revnet which
+      We ran into this exact problem when building our own software projects:
+      Why isn't there a simple way to set up rules in advance, and automatically
+      share money with a network of supporters as it comes in?
+    </p>
+
+    <h2>Our Solution</h2>
+    <p>
+      To solve this, we're building "Revenue Networks" or <b>Revnets</b>, which
+      are a new way to get your project off the ground and fairly share money
+      with your entire network of investors, workers, and customers. Revnets are
+      designed with a few key principles:
+    </p>
+    <ol>
+      <li>
+        Anyone who supports a Revnet should get some of its revenue, whether
+        they're a worker, an investor, or a customer.
+      </li>
+      <li>
+        Revnet are owned by everyone in the network. Everyone interacts with a
+        Revnet according to the same rules.
+      </li>
+      <li>
+        Those rules should be set in place when the Revnet is created, and
+        impossible to change afterwards. Money can only come into or leave the
+        Revnet according to those rules, making scams and
+        <a
+          href="https://www.coindesk.com/learn/what-is-a-rug-pull-how-to-protect-yourself-from-getting-rugged/"
+          >rug pulls</a
+        >
+        impossible.
+      </li>
+      <li>
+        Anyone can make a Revnet and use it for whatever they want. Revnets
+        shouldn't depend on us or third parties to work.
+      </li>
+    </ol>
+    <p>
+      To accomplish this, we built Revnets using
+      <a href="https://ethereum.org/en/smart-contracts/">smart contracts</a> on
+      Ethereum. This means projects don't have to depend on us or third parties,
+      and makes it impossible to break the Revnet's rules as long as our
+      contracts (and Ethereum) stay secure.<sup>3</sup>
+    </p>
+
+    <h2>How Revnets Actually Work</h2>
+    <!-- <p>
+      When you make a Revnt
+    </p>
+    <p>
+      Revnets use tokens to represent a portion of revenue. Tokens are really
+      just numbers stored on a smart contract – you can think of these as
+      "points", "credits", or something else if it makes this easier.
+    </p> -->
+    <p>
+      Each Revnet issues its own token and accepts a currency, chosen when the
+      Revnet is created. Revnets don't have owners, and their rules are can't be
+      changed. To make things simpler, let's imagine ExampleNet, a Revnet which
       issues its own EXMP token and accepts ETH.<sup>2</sup>
     </p>
     <p>
@@ -72,8 +154,9 @@
       but it could also be a staking rewards contract, an airdrop stockpile, or
       something else.
     </p>
+    <hr />
     <p>
-      <sup>1</sup>See the
+      <sup>1</sup> See the
       <a
         href="https://raw.githubusercontent.com/rev-net/whitepaper/master/whitepaper/revnet.pdf"
         >yellow paper</a
@@ -81,180 +164,12 @@
       to learn more.
     </p>
     <p>
-      <sup>2</sup>Revnets can accept and denominate prices in other currencies.
-    </p>
-    <hr />
-    <h2>Pitch</h2>
-    <i
-      >Why use revnets? Adapted from
-      <a href="https://revnet.eth.limo/">revnet.eth.limo</a>.</i
-    >
-    <p>
-      <b>Revnets</b> are revenue-backed up-only networks, great for funding and
-      sustaining open source projects and internet networks.
-    </p>
-    <h2>State of Internet Business</h2>
-    <h4>
-      Open source software and openly accounted-for businesses should
-      outcompeting everything.
-    </h4>
-    <ul>
-      <li>
-        <p>
-          <strong>Scaled Collaboration:</strong> Global community accelerates
-          experimentation and innovation.
-        </p>
-      </li>
-      <li>
-        <p>
-          <strong>Full Transparency:</strong> Public code and accounting foster
-          trust and security.
-        </p>
-      </li>
-      <li>
-        <p>
-          <strong>Cost Efficiency:</strong> Many managerial expenses are not
-          needed when there are no secrets or artificial barriers to progress.
-        </p>
-      </li>
-    </ul>
-    <h2>Problem</h2>
-    <h4>
-      Open source struggles to enforce revenue-generation to pay for innovation,
-      maintenance, and growth, making its development reliant on free and
-      inconsistent labor, donations, grants, or corporate sponsorship.
-    </h4>
-    <ul>
-      <li>
-        <p>
-          <strong>Monetization Dilemma:</strong> Generating scalable and
-          unilateral revenue while keeping information openly copyable is
-          fragile since extracting profit margins encourage the use of
-          alternatives.
-        </p>
-      </li>
-      <li>
-        <p>
-          <strong>Value Dilemma:</strong> Conventional models fail to adequately
-          and consistently reward all contributors, reducing incentive to
-          participate on all fronts.
-        </p>
-      </li>
-      <li>
-        <p>
-          <strong>Dependency Dilemma:</strong> Many profitable businesses rely
-          deeply on open source components, yet don't have clarity on how to
-          foster a productive financial relationship with its community, or
-          motivation to do so unless developed in-house.
-        </p>
-      </li>
-    </ul>
-    <h2>Solution</h2>
-    <h4>
-      Revnets: A win-win-win openly-accounted-for growth model, for investors,
-      builders, and retail customers of open source and beyond. Powered by the
-      Juicebox and Uniswap protocols, on Ethereum.
-    </h4>
-    <ul>
-      <li>
-        <p>
-          <strong>Networks matter:</strong> The value around open source
-          projects is created by the community of supporters that invest, build,
-          and use them. Revnets take everyone's contribution into account,
-          providing a structured yet open way to grow and sustain the project.
-        </p>
-      </li>
-      <li>
-        <p>
-          <strong>Revenue matters:</strong> People prefer to pay for and help
-          projects when they love what it stands for and benefit from its
-          growth. Revnets encourage the community to capture revenue, creating a
-          self-fueling economy around the project.
-        </p>
-      </li>
-      <li>
-        <p>
-          <strong>Growth matters</strong>: With each generation of investors,
-          builders, and users building upon the last, revnets foster a
-          predictable and self-propagating growth model.
-        </p>
-      </li>
-      <li>
-        <p>
-          <strong>Incentives matter</strong>: By offering a structured
-          revenue-backed growth model, revnets incentivize contributions from
-          investors, builders, and users while providing clearity around
-          financial relationships, making the open-source project more
-          community-owned and less dependent on inconsistent external funding.
-        </p>
-      </li>
-    </ul>
-    <h2>How It Works</h2>
-    <ol>
-      <li>
-        <p>
-          <strong>Investment &amp; Revenue Capture:</strong> When Revnets take
-          in money, they issue out an option on that money to the payer, and
-          possibly a little to a builder. This means each payer receives a
-          rebate that increases in value as the network grows or shrinks,
-          aligning the interests of all parties involved.
-        </p>
-      </li>
-      <li>
-        <p>
-          <strong>Scheduled Option Issuance:</strong> Fewer of these options get
-          issued over time relative to the amount of money paid in, on a fixed
-          schedule. This acknowledges the risks and contributions of earlier
-          participants, increasing the value of existing options as new money
-          comes in.
-        </p>
-      </li>
-      <li>
-        <p>
-          <strong>Option Exercise &amp; Value Appreciation:</strong> When the
-          option is exercised, the remaining options become more valuable as the
-          total pool of available options decreases. The revnet's money can only
-          be accessed via these options, ensuring a controlled and incentivized
-          access to the funds.
-        </p>
-      </li>
-      <li>
-        <p>
-          <strong>Market Dynamics:</strong> The options can be traded on
-          exchanges, creating a market window between the ever-increasing price
-          ceiling created by the price of issuing new options, and the
-          ever-increasing price floor created by the value of exercising
-          options. This market dynamic provides a tangible value proposition for
-          initial and future investors, builders, and users.
-        </p>
-      </li>
-    </ol>
-    <p>
-      A revnet's fiscal policy results in the chart shown above. There are only
-      few immutable parameters tuned when a revnet is deployed which determine
-      the rate of price ceiling increases as the issuance of options decreases,
-      and the intensity of price floor increases as options are exercised.
+      <sup>2</sup> Revnets can accept and denominate prices in other currencies.
     </p>
     <p>
-      <a href="https://revnet.eth.limo/about"
-        >Learn more about how revnets work</a
-      >
-    </p>
-    <h2>Why Bet On Revnets</h2>
-    <p>
-      Revnets tie the act of paying for a public product to both a moral and
-      financial incentive. By paying into the revnet, individuals not only
-      fulfill a required or voluntary debt to the project and its supporting
-      community, they also create a means of benefiting from future payment.
-      This dual incentive structure motivates communities to support its own
-      growth instead of opting for free alternatives that struggle to find
-      sustainability.
-    </p>
-    <p>
-      Revnets are a clear, tangible, and equitable financial structure that
-      address the long-standing monetization dilemma in open source, built
-      specifically as an attractive model for networks of investors, builders,
-      and fee-paying consumers alike.
+      <sup>3</sup> There could be smart contract exploits, or exploits in the
+      Ethereum blockchain itself. Always do your research, and exercise
+      appropriate caution.
     </p>
   </body>
 </html>
