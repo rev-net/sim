@@ -96,80 +96,141 @@
       <a href="https://ethereum.org/en/smart-contracts/">smart contracts</a> on
       Ethereum. This means projects don't have to depend on us or third parties,
       and makes it impossible to break the Revnet's rules as long as our
-      contracts (and Ethereum) stay secure.<sup>3</sup>
+      contracts (and Ethereum) stay secure.<sup>1</sup>
     </p>
 
     <h2>How Revnets Actually Work</h2>
-    <!-- <p>
-      When you make a Revnt
-    </p>
     <p>
-      Revnets use tokens to represent a portion of revenue. Tokens are really
-      just numbers stored on a smart contract – you can think of these as
-      "points", "credits", or something else if it makes this easier.
-    </p> -->
-    <p>
-      Each Revnet issues its own token and accepts a currency, chosen when the
-      Revnet is created. Revnets don't have owners, and their rules are can't be
-      changed. To make things simpler, let's imagine ExampleNet, a Revnet which
-      issues its own EXMP token and accepts ETH.<sup>2</sup>
-    </p>
-    <p>
-      Anyone can pay ExampleNet with ETH to create EXMP. The price to create
-      EXMP is the <strong>price ceiling</strong>. It costs 1 ETH to create 1
-      EXMP at first, but EXMP will get more expensive over time, depending on
-      ExampleNet's increase frequency (how often the price ceiling increases)
-      and its increase amount (how much the price ceiling increases).
-    </p>
-    <p>
-      Anyone can destroy their EXMP to get back some ETH from ExampleNet. The
-      amount of ETH you can get back by destroying EXMP is the
-      <strong>price floor</strong>, which is based on your portion of the total
-      EXMP supply and the amount of ETH in ExampleNet. ExampleNet can also have
-      a price floor tax which keeps some of the ETH which would be reclaimed in
-      ExampleNet, raising the price floor for future reclaimers. The price floor
-      also increases as people buy EXMP over time (because it gets more
-      expensive).
-    </p>
-    <p>
-      This is why Revnets are 'up-only' – as long as network activity continues,
-      the price floor should continue to rise.
-    </p>
-    <p>
-      ExampleNet will issue EXMP at the price ceiling until a Uniswap pool forms
-      between EXMP and ETH. From that point onwards, while EXMP's Uniswap pool
-      price is between the price ceiling and price floor, EXMP will be purchased
-      and sold in that pool. If the EXMP price reaches the price ceiling or
-      price floor, the EXMP supply will expand or contract to meet market
-      demand.
-    </p>
-    <p>
-      ExampleNet can also set up a <strong>boost</strong> which sends a some
-      EXMP to a wallet address (the boost operator) for some time after
-      ExampleNet's creation.
-    </p>
-    <p>
-      ExampleNet can pre-mint some EXMP to the boost operator when ExampleNet is
-      created. The boost operator could be a core team or developer multisig,
-      but it could also be a staking rewards contract, an airdrop stockpile, or
-      something else.
-    </p>
-    <hr />
-    <p>
-      <sup>1</sup> See the
-      <a
-        href="https://raw.githubusercontent.com/rev-net/whitepaper/master/whitepaper/revnet.pdf"
-        >yellow paper</a
+      When you make a Revnet, you pick which currency you want it to accept.
+      Since Revnets are built on Ethereum, ETH is the simplest option.<sup
+        >2</sup
       >
-      to learn more.
     </p>
     <p>
-      <sup>2</sup> Revnets can accept and denominate prices in other currencies.
+      To represent ownership of the network (and a claim on some of its money),
+      Revnets use tokens. Tokens are really just numbers stored on a smart
+      contract – you can just as well think of these as "points", "credits", or
+      "options".
     </p>
     <p>
-      <sup>3</sup> There could be smart contract exploits, or exploits in the
+      Let's return to our Google Maps alternative. We'll make a Revnet named
+      <b>MapNet</b> which accepts ETH and uses MPN tokens to represent network
+      ownership.
+    </p>
+    <p>
+      Anyone can pay MapNet with ETH to make new MPN. The price to make new MPN
+      is also called the <strong>price ceiling</strong>. At first, it costs 1
+      ETH to create 1 MPN, but MPN will get more expensive over time, depending
+      on the price ceiling's <i>increase frequency</i> (how often the price
+      increases) and its <i>increase amount</i> (how much the price increases).
+    </p>
+    <p>
+      Anyone can destroy their MPN to get back some ETH from MapNet. The amount
+      of ETH you can get back is also called the
+      <strong>price floor</strong>. In the most basic scenario, if you have 1%
+      of the total number of MPN tokens and destroy them, you get back 1% of
+      MapNet's ETH.
+    </p>
+    <p>
+      MapNet can also have a price floor tax, which means you would get back
+      less than 1% of MapNet's ETH. That ETH would stay in MapNet, raising the
+      price floor for everyone else. The price floor also increases as it gets
+      more expensive to make new MPN (as long as people keep making it). This is
+      why Revnets are 'up-only' – as long as network activity continues, the
+      price floor should continue to rise.
+    </p>
+    <p>
+      MapNet will make MPN at the price ceiling until a
+      <a
+        href="https://support.uniswap.org/hc/en-us/articles/8829880740109-What-is-a-liquidity-pool-"
+        >Uniswap pool</a
+      >
+      (trading market) forms between MPN and ETH. From that point onwards, while
+      MPN's pool price is between the price ceiling and price floor, MPN will be
+      purchased and sold in that pool. If MPN's pool price reaches the price
+      ceiling or price floor, the MPN supply will grow or shrink to meet demand.
+    </p>
+    <p>
+      To boost early growth, MapNet can set up a
+      <strong>boost</strong>. A boost sends some MPN to a wallet address called
+      the <i>boost operator</i> for some time after MapNet is created. For
+      example: "for the first 100 days, when people buy MPN, send 10% of it to
+      our developer team's wallet".
+    </p>
+    <p>
+      MapNet can also pre-mint some MPN to that address when MapNet is created.
+      The address could be a core team or developer multisig, but it could also
+      be a staking rewards contract, an airdrop stockpile, or something else.
+    </p>
+
+    <h2>Why it Works</h2>
+    <p>Revnets work very well for a project like MapNet:</p>
+    <ul>
+      <li>
+        MapNet development needs some heavy lifting up front to get the basics
+        working – the boost (and pre-mint) can be used to encourage early work
+        from a team of developers.
+      </li>
+      <li>
+        Because MPN gets more expensive over time, early MapNet supporters will
+        have more of an incentive to leave reviews, label addresses, and use the
+        platform. If it grows, they win too.
+      </li>
+      <li>
+        Because of the price floor, the tokens can never lose all of their
+        value. This makes Revnets safer to participate in.
+      </li>
+    </ul>
+    <p>
+      But you need to be careful. If your boost or pre-mint is too large, it
+      might feel unfair and make people less likely to support your Revnet. If
+      the price increases too quickly, it might cause liquidity issues later on.
+      To get a sense of how these options play out, experiment with the
+      <a href="/">Revnet simulator</a>.
+    </p>
+    <p>
+      We think that Revnets will work best for open-source software, social
+      networks, and platforms which rely on user-generated content, but Revnets
+      can work for all kinds of applications. If you want to talk through your
+      idea, message us on
+      <a href="https://discord.com/invite/6Zr7Rtv6Ea">Discord</a> or
+      <a href="https://t.me/revnet_eth">Telegram</a>.
+    </p>
+
+    <hr />
+
+    <p>
+      <sup>1</sup> There could be smart contract exploits, or exploits in the
       Ethereum blockchain itself. Always do your research, and exercise
       appropriate caution.
     </p>
+    <p>
+      <sup>2</sup>Revnets can accept and denominate prices in other currencies.
+    </p>
+
+    <h3>Further Reading</h3>
+    <ol>
+      <li>
+        See our
+        <a
+          href="https://raw.githubusercontent.com/rev-net/whitepaper/master/whitepaper/revnet.pdf"
+          >yellow paper</a
+        >
+        for an in-depth explanation of the Revnet's mechanisms.
+      </li>
+      <li>
+        The Revnet smart contracts are available on
+        <a href="https://github.com/rev-net/revnet-contracts">GitHub</a>.
+      </li>
+      <li>
+        More Revnet writing is available on
+        <a href="https://revnet.eth.limo/">revnet.eth.limo</a>.
+      </li>
+      <li>
+        If you have questions, message us on
+        <a href="https://discord.com/invite/6Zr7Rtv6Ea">Discord</a> or
+        <a href="https://t.me/revnet_eth">Telegram</a>.
+      </li>
+    </ol>
   </body>
 </html>
