@@ -40,14 +40,14 @@
       </li>
       <li>
         You could set up something more experimental like a DAO, but this comes
-        with its own burdens – you have to figure out governance and onchain
-        logistics to even get things off the ground, and DAOs have risks like
-        governance takeovers that you don't want to deal with.
+        with its own challenges – you have to figure out governance and onchain
+        logistics before you even get started, and DAOs come with risks like
+        governance takeovers that you don't want to worry about.
       </li>
       <li>
         You could try to make things work without a formal organization, but a
         lack of pre-determined rules and boundaries can lead to disputes later
-        on.
+        on. The risk of this happening makes people less likely to buy in.
       </li>
     </ul>
     <p>
@@ -73,7 +73,7 @@
         they're a worker, an investor, or a customer.
       </li>
       <li>
-        Revnet are owned by everyone in the network. Everyone interacts with a
+        Revnets are owned by everyone in the network. Everyone interacts with a
         Revnet according to the same rules.
       </li>
       <li>
@@ -96,25 +96,25 @@
       <a href="https://ethereum.org/en/smart-contracts/">smart contracts</a> on
       Ethereum. This means projects don't have to depend on us or third parties,
       and makes it impossible to break the Revnet's rules as long as our
-      contracts (and Ethereum) stay secure.<sup>1</sup>
+      contracts (and Ethereum) stay secure.<sup>1 2</sup>
     </p>
 
     <h2>How Revnets Actually Work</h2>
     <p>
       When you make a Revnet, you pick which currency you want it to accept.
       Since Revnets are built on Ethereum, ETH is the simplest option.<sup
-        >2</sup
+        >3</sup
       >
     </p>
     <p>
-      To represent ownership of the network (and a claim on some of its money),
+      To represent a Revnet's ownership (and a claim on some of its money),
       Revnets use tokens. Tokens are really just numbers stored on a smart
       contract – you can just as well think of these as "points", "credits", or
       "options".
     </p>
     <p>
       Let's return to our Google Maps alternative. We'll make a Revnet named
-      <b>MapNet</b> which accepts ETH and uses MPN tokens to represent network
+      <b>MapNet</b> which accepts ETH and uses MPN tokens to represent MapNet
       ownership.
     </p>
     <p>
@@ -133,11 +133,12 @@
     </p>
     <p>
       MapNet can also have a price floor tax, which means you would get back
-      less than 1% of MapNet's ETH. That ETH would stay in MapNet, raising the
-      price floor for everyone else. The price floor also increases as it gets
-      more expensive to make new MPN (as long as people keep making it). This is
-      why Revnets are 'up-only' – as long as network activity continues, the
-      price floor should continue to rise.
+      less than 1% of MapNet's ETH. That ETH you didn't get would stay in
+      MapNet, raising the price floor for everyone else. The price floor also
+      increases as it gets more expensive to make new MPN (as long as people
+      keep making it). This is why Revnets are 'up-only' – as long as network
+      activity continues, the price floor should continue to rise, backing the
+      value of everyone's MPN.
     </p>
     <p>
       MapNet will make MPN at the price ceiling until a
@@ -148,7 +149,10 @@
       (trading market) forms between MPN and ETH. From that point onwards, while
       MPN's pool price is between the price ceiling and price floor, MPN will be
       purchased and sold in that pool. If MPN's pool price reaches the price
-      ceiling or price floor, the MPN supply will grow or shrink to meet demand.
+      ceiling or price floor, the MPN supply will grow or shrink to meet that
+      demand, which keeps the pool price between the ceiling and floor. This
+      keeps MPN prices stable and predictable, making people more confident
+      about the token.
     </p>
     <p>
       To boost early growth, MapNet can set up a
@@ -177,16 +181,37 @@
         platform. If it grows, they win too.
       </li>
       <li>
+        Holding MPN means you own part of MapNet – the more valuable MapNet
+        becomes, the more valuable MPN becomes. This makes workers, investors,
+        customers, and other MPN holders more likely to support MapNet's growth
+        through referrals and word-of-mouth.
+      </li>
+      <li>
         Because of the price floor, the tokens can never lose all of their
         value. This makes Revnets safer to participate in.
       </li>
     </ul>
     <p>
-      But you need to be careful. If your boost or pre-mint is too large, it
-      might feel unfair and make people less likely to support your Revnet. If
-      the price increases too quickly, it might cause liquidity issues later on.
-      To get a sense of how these options play out, experiment with the
+      But you need to be careful: the rules that control MapNet's price ceiling,
+      price floor, and the boost are locked in place once MapNet is launched. If
+      your boost or pre-mint is too large, it might feel unfair and make people
+      less likely to support the Revnet. If the price increases too quickly, it
+      might cause liquidity issues later on. To get a sense of how these options
+      play out, experiment with the
       <a href="/">Revnet simulator</a>.
+    </p>
+    <p>
+      Software companies sometimes use investor funding to make their product
+      free, or cheaper than the alternatives. Once their product has enough
+      users, the company will raise prices, possibly leaving users worse off
+      than they were before.
+    </p>
+    <p>
+      Revnets take a different approach: nothing is free, but customers know
+      exactly what they're getting into. If the project grows, the network of
+      people that made that happen is rewarded for it. And if the project fails,
+      losses are limited – even in a worst-case scenario, people can always get
+      some ETH back by destroying their MPN.
     </p>
     <p>
       We think that Revnets will work best for open-source software, social
@@ -197,19 +222,14 @@
       <a href="https://t.me/revnet_eth">Telegram</a>.
     </p>
 
-    <hr />
-
-    <p>
-      <sup>1</sup> There could be smart contract exploits, or exploits in the
-      Ethereum blockchain itself. Always do your research, and exercise
-      appropriate caution.
-    </p>
-    <p>
-      <sup>2</sup>Revnets can accept and denominate prices in other currencies.
-    </p>
-
-    <h3>Further Reading</h3>
+    <h2>Further Reading</h2>
+    <p>If you'd like to learn more:</p>
     <ol>
+      <li>
+        Message us on
+        <a href="https://discord.com/invite/6Zr7Rtv6Ea">Discord</a> or
+        <a href="https://t.me/revnet_eth">Telegram</a>. We'd love your input.
+      </li>
       <li>
         See our
         <a
@@ -226,11 +246,28 @@
         More Revnet writing is available on
         <a href="https://revnet.eth.limo/">revnet.eth.limo</a>.
       </li>
-      <li>
-        If you have questions, message us on
-        <a href="https://discord.com/invite/6Zr7Rtv6Ea">Discord</a> or
-        <a href="https://t.me/revnet_eth">Telegram</a>.
-      </li>
     </ol>
+
+    <hr />
+
+    <p>
+      <sup>1</sup> Operating on Ethereum means users must pay gas fees to
+      interact with Revnets. This can be expensive on Etheruem mainnet, but
+      we're planning to deploy Revnets on
+      <a href="https://ethereum.org/en/layer-2/">Layer 2 Networks</a> where gas
+      fees will be negligible.
+    </p>
+    <p>
+      <sup>2</sup> There could be smart contract exploits, or exploits in the
+      Ethereum blockchain itself. Always do your research, and exercise
+      appropriate caution.
+    </p>
+    <p>
+      <sup>3</sup>Revnets can accept and denominate prices in other currencies.
+    </p>
+
+    <p>
+      <i>Thanks to Jango, Sage, Sofia, and Hans for reading drafts of this.</i>
+    </p>
   </body>
 </html>
