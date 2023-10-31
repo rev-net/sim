@@ -34,9 +34,12 @@
     <ul>
       <li>
         Something like an LLC or a C corporation could work, but you would have
-        to deal with legal fees, paperwork, and management. These structures
-        make sense for working with shareholders and maximizing profits, but
-        that isn't your goal.
+        to deal with legal fees, paperwork, and management.<sup>1</sup> These
+        structures make sense for working with investors, but investment can
+        have its downsides: after months of outreach and negotiation, you may be
+        left with unfavorable terms or lose control of the project down the
+        line. Investors might push you towards risky growth strategies,
+        short-term goals, or selling the company.
       </li>
       <li>
         You could set up something more experimental like a DAO, but this comes
@@ -45,7 +48,7 @@
         governance takeovers that you don't want to worry about.
       </li>
       <li>
-        You could try to make things work without a formal organization, but a
+        You can try to make things work without a formal organization, but a
         lack of pre-determined rules and boundaries can lead to disputes later
         on. The risk of this happening makes people less likely to buy in.
       </li>
@@ -56,16 +59,16 @@
     </p>
     <p>
       We ran into this exact problem when building our own software projects:
-      Why isn't there a simple way to set up rules in advance, and automatically
-      share money with a network of supporters as it comes in?
+      why wasn't there a simple way to set up rules in advance, and
+      automatically share money with a network of supporters as it comes in?
     </p>
 
     <h2>Our Solution</h2>
     <p>
       To solve this, we're building "Revenue Networks" or <b>Revnets</b>, which
-      are a new way to get your project off the ground and fairly share money
-      with your entire network of investors, workers, and customers. Revnets are
-      designed with a few key principles:
+      are a new way to get your project started and fairly share money with your
+      entire network of investors, workers, and customers. Revnets are designed
+      with a few key principles:
     </p>
     <ol>
       <li>
@@ -79,7 +82,7 @@
       <li>
         Those rules should be set in place when the Revnet is created, and
         impossible to change afterwards. Money can only come into or leave the
-        Revnet according to those rules, making scams and
+        Revnet as those rules allow, making scams and
         <a
           href="https://www.coindesk.com/learn/what-is-a-rug-pull-how-to-protect-yourself-from-getting-rugged/"
           >rug pulls</a
@@ -94,20 +97,23 @@
     <p>
       To accomplish this, we built Revnets using
       <a href="https://ethereum.org/en/smart-contracts/">smart contracts</a> on
-      Ethereum. This means projects don't have to depend on us or third parties,
-      and makes it impossible to break the Revnet's rules as long as our
-      contracts (and Ethereum) stay secure.<sup>1 2</sup>
+      Ethereum (a smart contract is a computer programs uploaded to the
+      blockchain). Our smart contracts don't have an owner and will keep working
+      as long as the Ethereum blockchain is active.<sup>2 3</sup>
+      This means Revnets will keep working, even if we stop supporting them.
+      Also, Revnets don't depend on legal enforcement – unless the contracts get
+      hacked, it's impossible for anyone to break a Revnet's rules.
     </p>
 
     <h2>How Revnets Actually Work</h2>
     <p>
       When you make a Revnet, you pick which currency you want it to accept.
       Since Revnets are built on Ethereum, ETH is the simplest option.<sup
-        >3</sup
+        >4</sup
       >
     </p>
     <p>
-      To represent a Revnet's ownership (and a claim on some of its money),
+      To represent a Revnet's ownership (and a claim on some of its revenue),
       Revnets use tokens. Tokens are really just numbers stored on a smart
       contract – you can just as well think of these as "points", "credits", or
       "options".
@@ -141,6 +147,11 @@
       value of everyone's MPN.
     </p>
     <p>
+      The most you can lose is the gap between the price you bought MPN at and
+      the price floor. Over time, that gap should shrink, and eventually become
+      profit.
+    </p>
+    <p>
       MapNet will make MPN at the price ceiling until a
       <a
         href="https://support.uniswap.org/hc/en-us/articles/8829880740109-What-is-a-liquidity-pool-"
@@ -150,9 +161,9 @@
       MPN's pool price is between the price ceiling and price floor, MPN will be
       purchased and sold in that pool. If MPN's pool price reaches the price
       ceiling or price floor, the MPN supply will grow or shrink to meet that
-      demand, which keeps the pool price between the ceiling and floor. This
-      keeps MPN prices stable and predictable, making people more confident
-      about the token.
+      demand, keeping the pool price between the ceiling and floor. This keeps
+      MPN prices stable and predictable, making people more confident in the
+      token.
     </p>
     <p>
       To boost early growth, MapNet can set up a
@@ -163,12 +174,12 @@
     </p>
     <p>
       MapNet can also pre-mint some MPN to that address when MapNet is created.
-      The address could be a core team or developer multisig, but it could also
-      be a staking rewards contract, an airdrop stockpile, or something else.
+      These tokens can be used as a budget to pay a for early development, but
+      they can also be used for staking rewards, an airdrop stockpile, or
+      something else.
     </p>
 
     <h2>Why it Works</h2>
-    <p>Revnets work very well for a project like MapNet:</p>
     <ul>
       <li>
         MapNet development needs some heavy lifting up front to get the basics
@@ -176,9 +187,10 @@
         from a team of developers.
       </li>
       <li>
-        Because MPN gets more expensive over time, early MapNet supporters will
-        have more of an incentive to leave reviews, label addresses, and use the
-        platform. If it grows, they win too.
+        Because MPN gets more expensive over time, early MapNet supporters are
+        rewarded for taking greater risk, and have more of an incentive to leave
+        reviews, label addresses, and use the platform. If it grows, they win
+        too.
       </li>
       <li>
         Holding MPN means you own part of MapNet – the more valuable MapNet
@@ -202,9 +214,9 @@
     </p>
     <p>
       Software companies sometimes use investor funding to make their product
-      free, or cheaper than the alternatives. Once their product has enough
-      users, the company will raise prices, possibly leaving users worse off
-      than they were before.
+      free, or cheaper than its alternatives. Once their product has enough
+      users, the company will raise prices, often leaving users worse off than
+      they were before.
     </p>
     <p>
       Revnets take a different approach: nothing is free, but customers know
@@ -214,10 +226,13 @@
       some ETH back by destroying their MPN.
     </p>
     <p>
-      We think that Revnets will work best for open-source software, social
-      networks, and platforms which rely on user-generated content, but Revnets
-      can work for all kinds of applications. If you want to talk through your
-      idea, message us on
+      We think that Revnets will work best for open-source software,
+      decentralized protocols, social networks, and platforms which rely on
+      user-generated content: a platform which fairly rewards its users can
+      attract and retain people better than one which doesn't.
+    </p>
+    <p>
+      If you want to talk through an idea, message us on
       <a href="https://discord.com/invite/6Zr7Rtv6Ea">Discord</a> or
       <a href="https://t.me/revnet_eth">Telegram</a>.
     </p>
@@ -251,23 +266,31 @@
     <hr />
 
     <p>
-      <sup>1</sup> Operating on Ethereum means users must pay gas fees to
+      <sup>1</sup> Depending on the nature of your project, your Revnet may
+      require a legal entity. Talk to a legal expert about the relevant
+      regulations in your jurisdiction before using them.
+    </p>
+    <p>
+      <sup>2</sup> Operating on Ethereum means users must pay gas fees to
       interact with Revnets. This can be expensive on Etheruem mainnet, but
       we're planning to deploy Revnets on
       <a href="https://ethereum.org/en/layer-2/">Layer 2 Networks</a> where gas
       fees will be negligible.
     </p>
     <p>
-      <sup>2</sup> There could be smart contract exploits, or exploits in the
+      <sup>3</sup> There could be smart contract exploits, or exploits in the
       Ethereum blockchain itself. Always do your research, and exercise
       appropriate caution.
     </p>
     <p>
-      <sup>3</sup>Revnets can accept and denominate prices in other currencies.
+      <sup>4</sup> Revnets can accept and denominate prices in other currencies.
     </p>
 
     <p>
-      <i>Thanks to Jango, Sage, Sofia, and Hans for reading drafts of this.</i>
+      <i
+        >Thanks to Jango, Sage, Sofia, Hans, Grace, and Owen for reading drafts
+        of this.</i
+      >
     </p>
   </body>
 </html>
